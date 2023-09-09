@@ -1,0 +1,56 @@
+openapi: 3.0.1
+info:
+  title: BlockBet authentication API
+  description: This is a sample API used to illustrate the tooling around an API-first approach.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: dev
+paths:
+  /auth/login:
+    post:
+      summary: retrieve jwt tokens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginPostRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthLoginPostResponse'
+  /auth/sign-up:
+    post:
+      summary: sign up an account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthSignUpRequest'
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    AuthLoginPostRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    AuthLoginPostResponse:
+      type: object
+      properties:
+        token:
+          type: string
+    AuthSignUpRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string

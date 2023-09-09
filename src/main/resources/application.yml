@@ -1,0 +1,21 @@
+spring:
+  main:
+    allow-circular-references: true
+  datasource:
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/blockbetdb
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        default_schema: dev
+  flyway:
+    schemas: dev
+    url: jdbc:postgresql://localhost:5432/blockbetdb
+    user: postgres
+    password: postgres
+
+
+security:
+  jwt:
+    secretKey: "superSecretKeyNoOneCanGuess"
