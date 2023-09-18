@@ -27,6 +27,7 @@
 			<scope>test</scope>
 		</dependency>
 
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -89,6 +90,18 @@
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-compat-spec-parser</artifactId>
 			<version>1.0.63</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.web3j</groupId>
+			<artifactId>core</artifactId>
+			<version>4.8.9</version>
+		</dependency>
+		<dependency>  <!--this one to fix issue of web3j-->
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.9.3</version>
 		</dependency>
 
 
