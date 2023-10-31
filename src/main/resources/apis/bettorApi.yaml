@@ -1,0 +1,44 @@
+openapi: 3.0.1
+info:
+  title: BlockBet authentication API
+  description: This is a sample API used to illustrate the tooling around an API-first approach.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: dev
+paths:
+  /bettor/wallet:
+    post:
+      summary: create a blockchain wallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BettorWalletPostRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BettorWalletPostResponse'
+components:
+  schemas:
+    BettorWalletPostRequest:
+      type: object
+      properties:
+        password:
+          type: string
+    BettorWalletPostResponse:
+      type: object
+      required:
+        - address
+        - publicKey
+        - privateKey
+      properties:
+        address:
+          type: string
+        publicKey:
+          type: string
+        privateKey:
+          type: string

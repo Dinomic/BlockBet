@@ -121,6 +121,7 @@
 				<version>5.3.0</version>
 				<executions>
 					<execution>
+						<id>authenticationApi</id>
 						<goals>
 							<goal>generate</goal>
 						</goals>
@@ -134,9 +135,23 @@
 							<supportingFilesToGenerate>
 								ApiUtil.java
 							</supportingFilesToGenerate>
-							<!--							<configOptions>-->
-							<!--								<delegatePattern>true</delegatePattern>-->
-							<!--							</configOptions>-->
+						</configuration>
+					</execution>
+					<execution>
+						<id>bettorApi</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>
+								${project.basedir}/src/main/resources/apis/bettorApi.yaml
+							</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>blockbet.openapi.api</apiPackage>
+							<modelPackage>blockbet.openapi.model</modelPackage>
+							<supportingFilesToGenerate>
+								ApiUtil.java
+							</supportingFilesToGenerate>
 						</configuration>
 					</execution>
 				</executions>

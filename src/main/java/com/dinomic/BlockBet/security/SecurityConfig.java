@@ -1,5 +1,6 @@
 package com.dinomic.BlockBet.security;
 
+import com.dinomic.BlockBet.enums.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +41,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(registry -> registry
                         .requestMatchers("/test/num1").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/bettor/**").hasAnyRole(Role.ROLE_BOOKIE.getRole(), Role.ROLE_BETTOR.getRole())
                         .anyRequest().authenticated());
 
         return http.build();
