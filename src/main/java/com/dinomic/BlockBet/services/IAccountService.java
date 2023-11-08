@@ -1,14 +1,14 @@
 package com.dinomic.BlockBet.services;
 
-import blockbet.openapi.model.BettorWalletPostRequest;
-import blockbet.openapi.model.BettorWalletPostResponse;
+import blockbet.openapi.model.WalletPostRequest;
+import blockbet.openapi.model.WalletPostResponse;
 import com.dinomic.BlockBet.entities.Account;
 
 import javax.validation.constraints.NotNull;
 
 public interface IAccountService {
 
-    BettorWalletPostResponse createWalletForAccount(@NotNull Account account, @NotNull BettorWalletPostRequest request);
+    WalletPostResponse createWalletForAccount(@NotNull Account account, @NotNull WalletPostRequest request);
 
     Account getAccountByAccountId(@NotNull Long id);
 

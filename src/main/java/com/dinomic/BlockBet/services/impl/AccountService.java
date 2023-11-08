@@ -1,7 +1,7 @@
 package com.dinomic.BlockBet.services.impl;
 
-import blockbet.openapi.model.BettorWalletPostRequest;
-import blockbet.openapi.model.BettorWalletPostResponse;
+import blockbet.openapi.model.WalletPostRequest;
+import blockbet.openapi.model.WalletPostResponse;
 import com.dinomic.BlockBet.entities.Account;
 import com.dinomic.BlockBet.entities.Authority;
 import com.dinomic.BlockBet.entities.Wallet;
@@ -10,7 +10,6 @@ import com.dinomic.BlockBet.repositories.IAccountRepo;
 import com.dinomic.BlockBet.services.IAccountService;
 import com.dinomic.BlockBet.services.IBlockchainService;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +26,8 @@ public class AccountService implements IAccountService {
     IBlockchainService blockchainService;
 
     @Override
-    public BettorWalletPostResponse createWalletForAccount(Account account, BettorWalletPostRequest request){
-        BettorWalletPostResponse response = new BettorWalletPostResponse();
+    public WalletPostResponse createWalletForAccount(Account account, WalletPostRequest request){
+        WalletPostResponse response = new WalletPostResponse();
 
         Wallet newWallet;
 
