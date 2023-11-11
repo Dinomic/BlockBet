@@ -3,6 +3,8 @@ package com.dinomic.BlockBet.services.impl;
 import com.dinomic.BlockBet.IBBAppConstant;
 import com.dinomic.BlockBet.entities.Account;
 import com.dinomic.BlockBet.entities.Wallet;
+import com.dinomic.BlockBet.exception.BlockBetError;
+import com.dinomic.BlockBet.exception.BlockBetException;
 import com.dinomic.BlockBet.repositories.IWalletRepo;
 import com.dinomic.BlockBet.services.IBlockchainService;
 import jakarta.validation.constraints.NotNull;
@@ -13,16 +15,22 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class BlockchainService implements IBlockchainService {
@@ -61,10 +69,31 @@ public class BlockchainService implements IBlockchainService {
     }
 
     @Override
+    public Map<String, BigInteger> getWalletBalances(List<String> walletAddresses) {
+        Map<String, BigInteger> result = new HashMap<>();
+
+        for (String address : walletAddresses) {
+            result.put(address, getWalletBalance(address));
+        }
+
+        return result;
+    }
+
+    @Override
+    public BigInteger getWalletBalance(String walletAddress) {
+        try {
+            EthGetBalance ethGetBalance = web3j.ethGetBalance(walletAddress,
+                    DefaultBlockParameterName.LATEST).send();
+
+            return ethGetBalance.getBalance();
+        } catch (IOException e) {
+            throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR, "Error getting wallet balance");
+        }
+    }
+
+    @Override
     public void transferEth(@NotNull Wallet from, @NotNull String toAddress, @NotNull BigInteger weiAmount) {
 
-//        Credentials credentials = Credentials.create(from.getPrivateKey());
-//        Credentials credentials = Credentials.create("0xbe4b83a3bff4fd9ec8b060e68fab18a2c0f78ac3943865931dcb73e6303dc48c");
         String randomAddress = null;
         try {
             randomAddress = Keys.getAddress(Keys.createEcKeyPair());

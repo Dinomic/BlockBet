@@ -3,6 +3,7 @@ package com.dinomic.BlockBet.controllers;
 import blockbet.openapi.api.BlockbetApi;
 import blockbet.openapi.model.WalletPostRequest;
 import blockbet.openapi.model.WalletPostResponse;
+import blockbet.openapi.model.WalletsGetResponse;
 import com.dinomic.BlockBet.entities.Account;
 import com.dinomic.BlockBet.security.BlockBetAuthenticationToken;
 import com.dinomic.BlockBet.services.IAccountService;
@@ -20,9 +21,16 @@ public class GeneralController implements BlockbetApi {
     @Override
     public ResponseEntity<WalletPostResponse> blockbetWalletPost(WalletPostRequest walletPostRequest){
         BlockBetAuthenticationToken userDetail = (BlockBetAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-
         Account account = accountService.getAccountByAccountId(userDetail.getPrincipal().getAccountId());
 
-        return ResponseEntity.ok(accountService.createWalletForAccount(account, walletPostRequest));
+        return ResponseEntity.ok(accountService.handleWalletPostRequest(account, walletPostRequest));
+    }
+
+    @Override
+    public ResponseEntity<WalletsGetResponse> blockbetWalletsGet() {
+        BlockBetAuthenticationToken userDetail = (BlockBetAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        Account account = accountService.getAccountByAccountId(userDetail.getPrincipal().getAccountId());
+
+        return ResponseEntity.ok(accountService.handleWalletsGetRequest(account));
     }
 }

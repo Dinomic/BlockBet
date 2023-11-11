@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
 
 public interface IBlockchainService {
 
@@ -14,4 +16,8 @@ public interface IBlockchainService {
     void transferEth(@NotNull Wallet from, @NotNull String toAddress, @NotNull BigInteger weiAmount);
 
     void transferEthFromFaucet(@NotNull String toAddress, @NotNull BigDecimal etherAmount);
+
+    Map<String, BigInteger> getWalletBalances(List<String> walletAddresses);
+
+    BigInteger getWalletBalance(String walletAddress);
 }

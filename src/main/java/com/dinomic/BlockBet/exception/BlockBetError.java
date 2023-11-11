@@ -1,8 +1,7 @@
 package com.dinomic.BlockBet.exception;
 
 public enum BlockBetError {
-
-    UNEXPECTED_ERROR(500),
+    BLOCKCHAIN_ERROR(500),
     TEST_ERROR(400);
 
     final int code;

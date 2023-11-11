@@ -22,8 +22,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WalletPostResponse'
+
+  /blockbet/wallets:
+    get:
+      summary: get wallets infos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletsGetResponse'
+
 components:
   schemas:
+    WalletsGetResponse:
+      type: object
+      properties:
+        wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Wallet'
+    Wallet:
+      type: object
+      required:
+        - address
+        - publicKey
+        - privateKey
+        - balance
+      properties:
+        address:
+          type: string
+        publicKey:
+          type: string
+        privateKey:
+          type: string
+        balance:
+          description: account balance in wei
+          type: number
+
     WalletPostRequest:
       type: object
       properties:
