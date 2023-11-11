@@ -59,6 +59,22 @@ public class BlockBetErrorRestResponse {
         this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
     }
 
+    public BlockBetErrorRestResponse(String message,  HttpStatus httpStatus) {
+
+        this.errorCode = httpStatus.value();
+        this.error = httpStatus.name();
+        this.message = message;
+
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (requestAttributes != null) {
+            this.path  = requestAttributes.getRequest().getRequestURI();
+        } else {
+            this.path = RequestContextHolder.currentRequestAttributes().getSessionId();
+        }
+
+        this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
+    }
+
     public Timestamp getTimestamp() {
         return timestamp;
     }

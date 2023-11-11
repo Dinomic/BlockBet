@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -25,6 +26,9 @@ public class SecurityConfig {
 
     @Autowired
     private AuthenticationProvider authenticationProvider;
+
+    @Autowired
+    AuthenticationEntryPoint authEntryPoint;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -43,7 +47,9 @@ public class SecurityConfig {
                         .requestMatchers("/test/num1").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/bettor/**").hasAnyRole(Role.ROLE_BOOKIE.getRole(), Role.ROLE_BETTOR.getRole())
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+                .exceptionHandling((httpSecurityExceptionHandlingConfigurer ->
+                        httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(authEntryPoint)));
 
         return http.build();
     }
