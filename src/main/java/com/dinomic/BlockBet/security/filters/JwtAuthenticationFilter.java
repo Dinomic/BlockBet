@@ -1,5 +1,8 @@
-package com.dinomic.BlockBet.security;
+package com.dinomic.BlockBet.security.filters;
 
+import com.dinomic.BlockBet.security.BlockBetAuthenticationToken;
+import com.dinomic.BlockBet.security.jwt.JwtDecoder;
+import com.dinomic.BlockBet.security.SecurityMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

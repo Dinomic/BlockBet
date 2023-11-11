@@ -2,6 +2,8 @@ package com.dinomic.BlockBet.controllers;
 
 import com.dinomic.BlockBet.entities.Account;
 import com.dinomic.BlockBet.entities.Wallet;
+import com.dinomic.BlockBet.exception.BlockBetError;
+import com.dinomic.BlockBet.exception.BlockBetException;
 import com.dinomic.BlockBet.services.IBlockchainService;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,5 +46,12 @@ public class TestController {
     public String testNum4() throws Exception {
         blockchainService.transferEth(new Wallet(), "0x05d77d6951dadc8952d5ba9f1b91124a6570de70", BigInteger.ONE);
         return "test num 4 OK";
+    }
+
+
+    @GetMapping("/num5")
+    public String testNum5() throws Exception {
+        throw new BlockBetException(BlockBetError.TEST_ERROR, "test");
+//        return "test num 5 OK";
     }
 }
