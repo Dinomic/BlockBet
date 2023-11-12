@@ -7,6 +7,7 @@ import blockbet.openapi.model.WalletsGetResponse;
 import com.dinomic.BlockBet.entities.Account;
 import com.dinomic.BlockBet.security.BlockBetAuthenticationToken;
 import com.dinomic.BlockBet.services.IAccountService;
+import com.dinomic.BlockBet.services.IBlockBetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,12 +19,15 @@ public class GeneralController implements BlockbetApi {
     @Autowired
     IAccountService accountService;
 
+    @Autowired
+    IBlockBetService blockBetService;
+
     @Override
     public ResponseEntity<WalletPostResponse> blockbetWalletPost(WalletPostRequest walletPostRequest){
         BlockBetAuthenticationToken userDetail = (BlockBetAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         Account account = accountService.getAccountByAccountId(userDetail.getPrincipal().getAccountId());
 
-        return ResponseEntity.ok(accountService.handleWalletPostRequest(account, walletPostRequest));
+        return ResponseEntity.ok(blockBetService.handleWalletPostRequest(account, walletPostRequest));
     }
 
     @Override
@@ -31,6 +35,6 @@ public class GeneralController implements BlockbetApi {
         BlockBetAuthenticationToken userDetail = (BlockBetAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         Account account = accountService.getAccountByAccountId(userDetail.getPrincipal().getAccountId());
 
-        return ResponseEntity.ok(accountService.handleWalletsGetRequest(account));
+        return ResponseEntity.ok(blockBetService.handleWalletsGetRequest(account));
     }
 }

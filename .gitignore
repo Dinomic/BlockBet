@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Project's ###
+!**/src/main/java/com/dinomic/BlockBet/wallet_fles/
+
