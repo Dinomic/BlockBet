@@ -1,10 +1,10 @@
 package com.dinomic.BlockBet.services.impl;
 
-import blockbet.openapi.model.WalletPostRequest;
-import blockbet.openapi.model.WalletPostResponse;
-import blockbet.openapi.model.WalletsGetResponse;
+import blockbet.openapi.model.*;
 import com.dinomic.BlockBet.entities.Account;
 import com.dinomic.BlockBet.entities.Wallet;
+import com.dinomic.BlockBet.exception.BlockBetError;
+import com.dinomic.BlockBet.exception.BlockBetException;
 import com.dinomic.BlockBet.repositories.IWalletRepo;
 import com.dinomic.BlockBet.services.IBlockBetService;
 import com.dinomic.BlockBet.services.IBlockchainService;
@@ -44,7 +44,7 @@ public class BlockBetService implements IBlockBetService {
         response.setPublicKey(newWallet.getPublicKey());
         response.setPrivateKey(newWallet.getPrivateKey());
 
-        blockchainService.transferEthFromFaucet(newWallet.getAddress(), BigDecimal.TEN);
+        blockchainService.transferEthFromFaucet(newWallet.getAddress(), 10);
 
         return response;
     }
@@ -68,6 +68,25 @@ public class BlockBetService implements IBlockBetService {
 
             response.addWalletsItem(responseWallet);
         }
+
+        return response;
+    }
+
+    @Override
+    public TransferTokensPutResponse handleTransferTokensPutRequest(Account account, TransferTokensPutRequest request) {
+        TransferTokensPutResponse response = new TransferTokensPutResponse();
+
+        Wallet fromWallet = walletRepo.findByAccountAndAddress(account, request.getFromAddress()).orElseThrow(() ->
+                new BlockBetException(BlockBetError.WALLET_NOT_FOUND, "Wallet not found with associated account")
+        );
+
+        if (!fromWallet.getPrivateKey().equals(request.getFromPrivateKey())) {
+            throw new BlockBetException(BlockBetError.INPUT_PRIVATE_KEY_NOT_MATCH, "input private key not match");
+        }
+
+        response.setTxHash(blockchainService.transferEth(fromWallet, request.getToAddress(),
+                request.getAmount()));
+
 
         return response;
     }

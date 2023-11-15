@@ -2,9 +2,12 @@ package com.dinomic.BlockBet.services.impl;
 
 import com.dinomic.BlockBet.IBBAppConstant;
 import com.dinomic.BlockBet.entities.Account;
+import com.dinomic.BlockBet.entities.BBTransactionReceipt;
 import com.dinomic.BlockBet.entities.Wallet;
+import com.dinomic.BlockBet.enums.TransactionType;
 import com.dinomic.BlockBet.exception.BlockBetError;
 import com.dinomic.BlockBet.exception.BlockBetException;
+import com.dinomic.BlockBet.repositories.ITransactionReceiptRepo;
 import com.dinomic.BlockBet.repositories.IWalletRepo;
 import com.dinomic.BlockBet.services.IBlockchainService;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.Keys;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -25,9 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,9 @@ public class BlockchainService implements IBlockchainService {
 
     @Autowired
     IWalletRepo walletRepo;
+
+    @Autowired
+    ITransactionReceiptRepo transactionReceiptRepo;
 
     @Override
     public Wallet createWallet(Account account, String password) throws Exception {
@@ -92,41 +94,44 @@ public class BlockchainService implements IBlockchainService {
     }
 
     @Override
-    public void transferEth(@NotNull Wallet from, @NotNull String toAddress, @NotNull BigInteger weiAmount) {
-
-        String randomAddress = null;
-        try {
-            randomAddress = Keys.getAddress(Keys.createEcKeyPair());
-        } catch (InvalidAlgorithmParameterException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchProviderException e) {
-            throw new RuntimeException(e);
-        }
-
+    public String transferEth(@NotNull Wallet from, @NotNull String toAddress, @NotNull BigInteger weiAmount) {
 
         try {
-            TransactionReceipt transactionReceipt = Transfer.sendFunds(
-                    web3j, Credentials.create("0x" + "b0386e69d886de4f3d3fdef43e783c746ac995d56a4199cc3002eb5b512dc3f7"),
-                    "0x05d77d6951dadc8952d5ba9f1b91124a6570de70",
-                    BigDecimal.valueOf(10000000), Convert.Unit.ETHER).send();
+            TransactionReceipt transactionReceipt = Transfer.sendFunds(web3j, Credentials.create(from.getPrivateKey()),
+                    toAddress, new BigDecimal(weiAmount), Convert.Unit.WEI).send();
+
+            BBTransactionReceipt receipt = transactionReceiptRepo.save(transactionReceiptConvert(transactionReceipt, TransactionType.TOKEN_TRANSFER));
+            return receipt.getHash();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     @Override
-    public void transferEthFromFaucet(@NotNull String toAddress, @NotNull BigDecimal etherAmount) {
+    public void transferEthFromFaucet(@NotNull String toAddress, @NotNull Integer etherAmount) {
         try {
             TransactionReceipt transactionReceipt = Transfer.sendFunds(
                     web3j, Credentials.create("0x" + "b0386e69d886de4f3d3fdef43e783c746ac995d56a4199cc3002eb5b512dc3f7"),
-                    toAddress, etherAmount, Convert.Unit.ETHER).send();
+                    toAddress, BigDecimal.valueOf(etherAmount), Convert.Unit.ETHER).send();
 
-            // to log funding transaction
+            transactionReceiptRepo.save(transactionReceiptConvert(transactionReceipt, TransactionType.FUNDING));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private BBTransactionReceipt transactionReceiptConvert(TransactionReceipt receipt, TransactionType type) {
+        BBTransactionReceipt result = new BBTransactionReceipt();
+
+        result.setTransactionType(type);
+        result.setHash(receipt.getTransactionHash());
+        result.setFromAddress(TransactionType.FUNDING.equals(type) ?  IBBAppConstant.internalAccount : receipt.getFrom());
+        result.setToAddress(receipt.getTo());
+        result.setBlockHash(receipt.getBlockHash());
+        result.setBlockNumber(receipt.getBlockNumber().intValue());
+        result.setGasUsed(receipt.getGasUsed().intValue());
+        result.setEffectiveGasPrice(Integer.parseInt(receipt.getEffectiveGasPrice().substring(3), 16));
+
+        return result;
     }
 }

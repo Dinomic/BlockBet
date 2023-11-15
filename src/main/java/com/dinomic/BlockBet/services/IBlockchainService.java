@@ -13,11 +13,11 @@ public interface IBlockchainService {
 
     Wallet createWallet(Account account, String password) throws Exception;
 
-    void transferEth(@NotNull Wallet from, @NotNull String toAddress, @NotNull BigInteger weiAmount);
+    String transferEth(@NotNull Wallet from, @NotNull String toAddress, @NotNull BigInteger weiAmount);
 
-    void transferEthFromFaucet(@NotNull String toAddress, @NotNull BigDecimal etherAmount);
+    void transferEthFromFaucet(@NotNull String toAddress, @NotNull Integer etherAmount);
 
-    Map<String, BigInteger> getWalletBalances(List<String> walletAddresses);
+    Map<String, BigInteger> getWalletBalances(@NotNull List<String> walletAddresses);
 
-    BigInteger getWalletBalance(String walletAddress);
+    BigInteger getWalletBalance(@NotNull String walletAddress);
 }

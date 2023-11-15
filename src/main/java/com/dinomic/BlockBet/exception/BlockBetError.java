@@ -2,7 +2,8 @@ package com.dinomic.BlockBet.exception;
 
 public enum BlockBetError {
     BLOCKCHAIN_ERROR(500),
-    TEST_ERROR(400);
+    INPUT_PRIVATE_KEY_NOT_MATCH(400),
+    WALLET_NOT_FOUND(404);
 
     final int code;
 

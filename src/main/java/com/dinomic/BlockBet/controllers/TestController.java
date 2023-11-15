@@ -44,14 +44,15 @@ public class TestController {
 
     @GetMapping("/num4")
     public String testNum4() throws Exception {
-        blockchainService.transferEth(new Wallet(), "0x05d77d6951dadc8952d5ba9f1b91124a6570de70", BigInteger.ONE);
-        return "test num 4 OK";
+        Wallet testWallet = new Wallet();
+        testWallet.setPrivateKey("0x3c6932e46cc5c38f7c96c234d18e08ac0c83faee214652b494254c0f9e4e7404");
+        return blockchainService.transferEth(testWallet, "0x05d77d6951dadc8952d5ba9f1b91124a6570de70", BigInteger.valueOf(100000L));
     }
 
 
     @GetMapping("/num5")
     public String testNum5() throws Exception {
-        throw new BlockBetException(BlockBetError.TEST_ERROR, "test");
+        throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR, "test");
 //        return "test num 5 OK";
     }
 }
