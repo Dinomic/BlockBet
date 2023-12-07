@@ -50,8 +50,67 @@ paths:
               schema:
                 $ref: '#/components/schemas/TransferTokensPutResponse'
 
+  /blockbet/receipts:
+    get:
+      summary: get transaction receipts
+      parameters:
+        - in: query
+          name: offset
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptsGetResponse'
+
+
 components:
   schemas:
+    ReceiptsGetResponse:
+      type: object
+      required:
+        - offset
+        - limit
+        - total
+        - result
+      properties:
+        offset:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReceiptsGetResponseEntry'
+    ReceiptsGetResponseEntry:
+      type: object
+      properties:
+        hash:
+          type: string
+        fromAddress:
+          type: string
+        toAddress:
+          type: string
+        blockHash:
+          type: string
+        blockNumber:
+          type: integer
+        gasUsed:
+          type: integer
+        effectiveGasPrice:
+          type: integer
+
     TransferTokensPutRequest:
       type: object
       required:

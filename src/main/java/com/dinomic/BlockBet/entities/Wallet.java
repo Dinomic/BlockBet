@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "WALLETS")
 public class Wallet {
-    @SequenceGenerator(name = "SEQ_WALLETS", sequenceName = "SEQ_WALLETS", allocationSize = 100)
+    @SequenceGenerator(name = "SEQ_WALLETS", sequenceName = "SEQ_WALLETS", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_WALLETS")
     @Column(name = "WALLET_ID", nullable = false)
     @Id

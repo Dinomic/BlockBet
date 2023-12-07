@@ -10,7 +10,6 @@ import com.dinomic.BlockBet.exception.BlockBetException;
 import com.dinomic.BlockBet.repositories.ITransactionReceiptRepo;
 import com.dinomic.BlockBet.repositories.IWalletRepo;
 import com.dinomic.BlockBet.services.IBlockchainService;
-import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -94,7 +93,7 @@ public class BlockchainService implements IBlockchainService {
     }
 
     @Override
-    public String transferEth(@NotNull Wallet from, @NotNull String toAddress, @NotNull BigInteger weiAmount) {
+    public String transferEth(Wallet from, String toAddress, BigInteger weiAmount) {
 
         try {
             TransactionReceipt transactionReceipt = Transfer.sendFunds(web3j, Credentials.create(from.getPrivateKey()),
@@ -108,7 +107,7 @@ public class BlockchainService implements IBlockchainService {
     }
 
     @Override
-    public void transferEthFromFaucet(@NotNull String toAddress, @NotNull Integer etherAmount) {
+    public void transferEthFromFaucet(String toAddress, Integer etherAmount) {
         try {
             TransactionReceipt transactionReceipt = Transfer.sendFunds(
                     web3j, Credentials.create("0x" + "b0386e69d886de4f3d3fdef43e783c746ac995d56a4199cc3002eb5b512dc3f7"),

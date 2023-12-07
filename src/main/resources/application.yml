@@ -3,7 +3,7 @@ spring:
     allow-circular-references: true
   datasource:
     username: postgres
-    url: jdbc:postgresql://localhost:5432/blockbetdb
+    url: jdbc:postgresql://localhost:5432/blockbetdb?currentSchema=dev
     password: postgres
   jpa:
     properties:

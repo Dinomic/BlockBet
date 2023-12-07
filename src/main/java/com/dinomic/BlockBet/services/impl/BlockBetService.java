@@ -5,6 +5,9 @@ import com.dinomic.BlockBet.entities.Account;
 import com.dinomic.BlockBet.entities.Wallet;
 import com.dinomic.BlockBet.exception.BlockBetError;
 import com.dinomic.BlockBet.exception.BlockBetException;
+import com.dinomic.BlockBet.mappers.GeneralMapper;
+import com.dinomic.BlockBet.mappers.GeneralMapperImpl;
+import com.dinomic.BlockBet.repositories.IBBTransactionReceiptRepo;
 import com.dinomic.BlockBet.repositories.IWalletRepo;
 import com.dinomic.BlockBet.services.IBlockBetService;
 import com.dinomic.BlockBet.services.IBlockchainService;
@@ -26,7 +29,8 @@ public class BlockBetService implements IBlockBetService {
     @Autowired
     IWalletRepo walletRepo;
 
-
+    @Autowired
+    IBBTransactionReceiptRepo bbTransactionReceiptRepo;
 
     @Override
     public WalletPostResponse handleWalletPostRequest(Account account, WalletPostRequest request){
@@ -88,6 +92,13 @@ public class BlockBetService implements IBlockBetService {
                 request.getAmount()));
 
 
+        return response;
+    }
+
+    @Override
+    public ReceiptsGetResponse handleReceiptsGetRequest(BigInteger offset, BigInteger limit) {
+        ReceiptsGetResponse response = new ReceiptsGetResponse();
+        response.setResult(GeneralMapper.INSTANCE.bbTransactionReceiptsToReceiptsGetResponseEntries(bbTransactionReceiptRepo.getBBTransactionReceipts(offset, limit)));
         return response;
     }
 }

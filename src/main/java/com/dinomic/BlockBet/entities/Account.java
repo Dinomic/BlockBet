@@ -10,7 +10,7 @@ import java.util.Set;
 @Table(name = "ACCOUNTS")
 public class Account {
 
-    @SequenceGenerator(name = "SEQ_ACCOUNTS", sequenceName = "SEQ_ACCOUNTS", allocationSize = 100)
+    @SequenceGenerator(name = "SEQ_ACCOUNTS", sequenceName = "SEQ_ACCOUNTS", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_ACCOUNTS")
     @Column(name = "ACCOUNT_ID", nullable = false)
     @Id

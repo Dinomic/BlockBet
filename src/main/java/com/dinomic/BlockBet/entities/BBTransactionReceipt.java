@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 @Table(name = "TRANSACTION_RECEIPTS")
 @AllArgsConstructor
 public class BBTransactionReceipt {
-    @SequenceGenerator(name = "SEQ_TRANSACTION_RECEIPTS", sequenceName = "SEQ_TRANSACTION_RECEIPTS", allocationSize = 100)
+    @SequenceGenerator(name = "SEQ_TRANSACTION_RECEIPTS", sequenceName = "SEQ_TRANSACTION_RECEIPTS", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_TRANSACTION_RECEIPTS")
     @Column(name = "TRANSACTION_RECEIPT_ID", nullable = false)
     @Id

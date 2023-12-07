@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 @Table(name = "AUTHORITIES")
 public class Authority {
 
-    @SequenceGenerator(name = "SEQ_AUTHORITIES", sequenceName = "SEQ_AUTHORITIES", allocationSize = 100)
+    @SequenceGenerator(name = "SEQ_AUTHORITIES", sequenceName = "SEQ_AUTHORITIES", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_AUTHORITIES")
     @Column(name = "AUTHORITY_ID", nullable = false)
     @Id

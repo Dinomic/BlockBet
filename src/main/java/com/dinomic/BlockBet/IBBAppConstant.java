@@ -5,5 +5,5 @@ public interface IBBAppConstant {
 
     String internalAccount = "BB_Internal_Account";
 
-    String walletFolderPath = "src/main/java/com/dinomic/BlockBet/wallet_fles/";
+    String walletFolderPath = "src/main/java/com/dinomic/BlockBet/wallet_files/";
 }

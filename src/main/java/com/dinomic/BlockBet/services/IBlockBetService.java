@@ -4,6 +4,7 @@ import blockbet.openapi.model.*;
 import com.dinomic.BlockBet.entities.Account;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigInteger;
 
 public interface IBlockBetService {
 
@@ -12,4 +13,6 @@ public interface IBlockBetService {
     WalletsGetResponse handleWalletsGetRequest(@NotNull Account account);
 
     TransferTokensPutResponse handleTransferTokensPutRequest(@NotNull Account account, @NotNull TransferTokensPutRequest request);
+
+    ReceiptsGetResponse handleReceiptsGetRequest(@NotNull BigInteger offset, @NotNull BigInteger limit);
 }
