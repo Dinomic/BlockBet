@@ -14,12 +14,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.Transfer;
+import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 
 import java.io.File;
@@ -96,11 +100,19 @@ public class BlockchainService implements IBlockchainService {
     public String transferEth(Wallet from, String toAddress, BigInteger weiAmount) {
 
         try {
-            TransactionReceipt transactionReceipt = Transfer.sendFunds(web3j, Credentials.create(from.getPrivateKey()),
-                    toAddress, new BigDecimal(weiAmount), Convert.Unit.WEI).send();
 
-            BBTransactionReceipt receipt = transactionReceiptRepo.save(transactionReceiptConvert(transactionReceipt, TransactionType.TOKEN_TRANSFER));
-            return receipt.getHash();
+            EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
+                    from.getAddress(), DefaultBlockParameterName.PENDING).sendAsync().get();
+            BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+            BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+
+            RawTransaction rawTransaction  = RawTransaction.createEtherTransaction(
+                    nonce, gasPrice, Transfer.GAS_LIMIT, toAddress, weiAmount);
+
+            Credentials credentials = Credentials.create(from.getPrivateKey());
+            RawTransactionManager rawTransactionManager = new RawTransactionManager(web3j, credentials);
+
+            return rawTransactionManager.signAndSend(rawTransaction).getTransactionHash();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
