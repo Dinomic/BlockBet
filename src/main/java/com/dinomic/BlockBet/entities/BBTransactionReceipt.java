@@ -27,17 +27,20 @@ public class BBTransactionReceipt {
     @Column(name = "TO_ADDRESS", nullable = false)
     private String toAddress;
 
-    @Column(name = "BLOCK_HASH", nullable = false)
+    @Column(name = "BLOCK_HASH")
     private String blockHash;
 
-    @Column(name = "BLOCK_NUMBER", nullable = false)
+    @Column(name = "BLOCK_NUMBER")
     private Integer blockNumber;
 
-    @Column(name = "GAS_USED", nullable = false)
+    @Column(name = "GAS_USED")
     private Integer gasUsed;
 
-    @Column(name = "EFFECTIVE_GAS_PRICE", nullable = false)
+    @Column(name = "EFFECTIVE_GAS_PRICE")
     private Integer effectiveGasPrice;
+
+    @Column(name = "IS_SUCCESS")
+    private Boolean isSuccess;
 
     public BBTransactionReceipt() {
 
@@ -113,5 +116,13 @@ public class BBTransactionReceipt {
 
     public void setEffectiveGasPrice(Integer effectiveGasPrice) {
         this.effectiveGasPrice = effectiveGasPrice;
+    }
+
+    public Boolean getSuccess() {
+        return isSuccess;
+    }
+
+    public void setSuccess(Boolean success) {
+        isSuccess = success;
     }
 }

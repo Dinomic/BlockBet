@@ -6,7 +6,6 @@ import com.dinomic.BlockBet.entities.Wallet;
 import com.dinomic.BlockBet.exception.BlockBetError;
 import com.dinomic.BlockBet.exception.BlockBetException;
 import com.dinomic.BlockBet.mappers.GeneralMapper;
-import com.dinomic.BlockBet.mappers.GeneralMapperImpl;
 import com.dinomic.BlockBet.repositories.IBBTransactionReceiptRepo;
 import com.dinomic.BlockBet.repositories.IWalletRepo;
 import com.dinomic.BlockBet.services.IBlockBetService;

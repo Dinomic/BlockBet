@@ -14,6 +14,22 @@ spring:
     url: jdbc:postgresql://localhost:5432/blockbetdb
     user: postgres
     password: postgres
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: BlockBetQuartzScheduler
+            instanceId: AUTO
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 5
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            dataSource: blockbetdb
 
 
 security:
