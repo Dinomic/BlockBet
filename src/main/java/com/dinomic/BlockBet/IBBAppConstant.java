@@ -1,9 +1,9 @@
 package com.dinomic.BlockBet;
 
 public interface IBBAppConstant {
-    String hexPrefix = "0x";
+    String HEX_PREFIX = "0x";
 
-    String internalAccount = "BB_Internal_Account";
+    String INTERNAL_ACCOUNT = "BB_Internal_Account";
 
-    String walletFolderPath = "src/main/java/com/dinomic/BlockBet/wallet_files/";
+    String WALLET_FOLDER_PATH = "src/main/java/com/dinomic/BlockBet/wallet_files/";
 }

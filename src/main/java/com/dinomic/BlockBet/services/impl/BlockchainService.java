@@ -60,15 +60,15 @@ public class BlockchainService implements IBlockchainService {
         }
 
         String fileName = WalletUtils.generateNewWalletFile(
-                password, new File(IBBAppConstant.walletFolderPath));
+                password, new File(IBBAppConstant.WALLET_FOLDER_PATH));
 
         Credentials credentials = WalletUtils.loadCredentials(
                 password,
-                IBBAppConstant.walletFolderPath + fileName);
+                IBBAppConstant.WALLET_FOLDER_PATH + fileName);
 
         result.setAddress(credentials.getAddress());
-        result.setPublicKey(IBBAppConstant.hexPrefix + credentials.getEcKeyPair().getPublicKey().toString(16));
-        result.setPrivateKey(IBBAppConstant.hexPrefix + credentials.getEcKeyPair().getPrivateKey().toString(16));
+        result.setPublicKey(IBBAppConstant.HEX_PREFIX + credentials.getEcKeyPair().getPublicKey().toString(16));
+        result.setPrivateKey(IBBAppConstant.HEX_PREFIX + credentials.getEcKeyPair().getPrivateKey().toString(16));
         result.setAccount(account);
 
         return walletRepo.save(result);
@@ -206,7 +206,7 @@ public class BlockchainService implements IBlockchainService {
 
         result.setTransactionType(type);
         result.setHash(receipt.getTransactionHash());
-        result.setFromAddress(TransactionType.FUNDING.equals(type) ?  IBBAppConstant.internalAccount : receipt.getFrom());
+        result.setFromAddress(TransactionType.FUNDING.equals(type) ?  IBBAppConstant.INTERNAL_ACCOUNT : receipt.getFrom());
         result.setToAddress(receipt.getTo());
         result.setBlockHash(receipt.getBlockHash());
         result.setBlockNumber(receipt.getBlockNumber().intValue());

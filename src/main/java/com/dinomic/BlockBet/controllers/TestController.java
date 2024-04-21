@@ -1,5 +1,6 @@
 package com.dinomic.BlockBet.controllers;
 
+import com.dinomic.BlockBet.aws.dynamodb.IDynamoDBService;
 import com.dinomic.BlockBet.entities.Account;
 import com.dinomic.BlockBet.entities.Wallet;
 import com.dinomic.BlockBet.exception.BlockBetError;
@@ -21,6 +22,9 @@ public class TestController {
 
     @Autowired
     IBlockchainService blockchainService;
+
+    @Autowired
+    IDynamoDBService dynamoDBService;
 
     @GetMapping("/num1")
     public String testNum1() {
@@ -62,5 +66,11 @@ public class TestController {
     public String testNum6(@RequestParam(value = "hash", required = true) String hash) throws Exception {
         blockchainService.checkUnDoneTransaction(hash);
         return "test num 6 OK";
+    }
+
+    @GetMapping("/num7")
+    public String testNum7() throws Exception {
+        dynamoDBService.putItemToTable(null, null);
+        return "test num 7 OK";
     }
 }

@@ -1,6 +1,5 @@
 package com.dinomic.BlockBet.quazt.jobs;
 
-import com.dinomic.BlockBet.repositories.ITransactionReceiptRepo;
 import com.dinomic.BlockBet.services.IBlockchainService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import java.math.BigInteger;
 import java.time.OffsetDateTime;
-import java.util.List;
 
 @Component
 public class CheckPendingTransactionJob extends QuartzJobBean {

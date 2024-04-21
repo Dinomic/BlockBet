@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet;
+package com.dinomic.BlockBet.config;
 
 import lombok.Getter;
 import lombok.Setter;
