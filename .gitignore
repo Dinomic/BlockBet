@@ -34,4 +34,5 @@ build/
 
 ### Project's ###
 src/main/java/com/dinomic/BlockBet/wallet_files/
+src/web3j/generated/
 

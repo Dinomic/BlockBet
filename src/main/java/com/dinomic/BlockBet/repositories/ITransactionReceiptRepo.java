@@ -15,7 +15,7 @@ public interface ITransactionReceiptRepo extends JpaRepository<BBTransactionRece
 
     @Query(
             value = "select * from TRANSACTION_RECEIPTS tr " +
-                    "where tr.IS_DONE = false " +
+                    "where tr.IS_SUCCESS = false " +
                     "order by TRANSACTION_RECEIPT_ID " +
                     "offset :offset limit :limit ",
             nativeQuery = true
