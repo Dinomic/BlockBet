@@ -13,6 +13,8 @@ public interface IBlockchainService {
 
     static String RECEIPT_STATUS_SUCCESS = "0x1";
 
+    void deployContract(@NotNull Wallet from, @NotNull String password) throws Exception;
+
     Wallet createWallet(Account account, String password) throws Exception;
 
     String transferEth(@NotNull Wallet from, @NotNull String toAddress, @NotNull BigInteger weiAmount);
@@ -24,7 +26,6 @@ public interface IBlockchainService {
     BigInteger getWalletBalance(@NotNull String walletAddress);
 
     void checkUnDoneTransactions();
-
 
     BBTransactionReceipt checkUnDoneTransaction(@NotNull String txHash);
 }

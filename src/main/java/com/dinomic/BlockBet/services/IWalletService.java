@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface IWalletService {
     List<Wallet> getWallets(@NotNull Account account);
+
+    Wallet getWallet(@NotNull Account account, @NotNull String address);
 }

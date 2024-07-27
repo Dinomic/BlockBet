@@ -126,6 +126,16 @@
     </dependencies>
 
 	<build>
+
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>${project.build.directory}/generated-resources</directory>
+			</resource>
+		</resources>
+
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -187,49 +197,85 @@
 			<plugin>
 				<groupId>org.web3j</groupId>
 				<artifactId>web3j-maven-plugin</artifactId>
-				<version>4.11.1</version>
+				<version>4.8.7</version>
 				<executions>
 					<execution>
+						<id>generate-sources-web3j</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate-sources</goal>
+						</goals>
 						<configuration>
-							
+							<packageName>com.blockbet.contracts</packageName>
+							<nativeJavaType>true</nativeJavaType>
+							<outputFormat>java,bin</outputFormat>
+							<soliditySourceFiles>
+								<directory>${project.basedir}/src/main/resources</directory>
+								<includes>
+									<include>**/*.sol</include>
+								</includes>
+							</soliditySourceFiles>
+							<abiSourceFiles>
+								<directory>src/main/resources</directory>
+								<includes>
+									<include>**/*.json</include>
+								</includes>
+							</abiSourceFiles>
+							<outputDirectory>
+								<java>${project.build.directory}/generated-sources/web3j/java</java>
+								<bin>${project.build.directory}/generated-sources/web3j/java</bin>
+								<!-- <abi>src/web3j/generated</abi> -->
+							</outputDirectory>
+							<pathPrefixes>
+								<pathPrefix>dep=../dependencies</pathPrefix>
+							</pathPrefixes>
 						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<packageName>com.dinomic.BlockBet.contracts</packageName>
-					<!-- <sourceDestination>src/main/java/generated</sourceDestination> -->
-					<nativeJavaType>true</nativeJavaType>
-					<outputFormat>java,bin</outputFormat>
-					<soliditySourceFiles>
-						<directory>src/main/resources</directory>
-						<includes>
-							<include>**/*.sol</include>
-						</includes>
-					</soliditySourceFiles>
-					<abiSourceFiles>
-						<directory>src/main/resources</directory>
-						<includes>
-							<include>**/*.json</include>
-						</includes>
-					</abiSourceFiles>
-					<outputDirectory>
-						<java>src/web3j/generated</java>
-						<bin>src/web3j/generated</bin>
-						<abi>src/web3j/generated</abi>
-					</outputDirectory>
-					<!-- <contract>
-						<includes>
-							<include>greeter</include>
-						</includes>
-						<excludes>
-							<exclude>mortal</exclude>
-						</excludes>
-					</contract> -->
-					<!-- <pathPrefixes>
-						<pathPrefix>dep=../dependencies</pathPrefix>
-					</pathPrefixes> -->
-				</configuration>
+<!--				<configuration>-->
+<!--					<packageName>contracts</packageName>-->
+<!--					<nativeJavaType>true</nativeJavaType>-->
+<!--					<outputFormat>java,bin</outputFormat>-->
+<!--					<soliditySourceFiles>-->
+<!--						<directory>${project.basedir}/src/main/resources</directory>-->
+<!--						<includes>-->
+<!--							<include>**/*.sol</include>-->
+<!--						</includes>-->
+<!--					</soliditySourceFiles>-->
+<!--					&lt;!&ndash; DO NOT NEED THIS FOR NOW &ndash;&gt;-->
+<!--					&lt;!&ndash; <abiSourceFiles>-->
+<!--						<directory>src/main/resources</directory>-->
+<!--						<includes>-->
+<!--							<include>**/*.json</include>-->
+<!--						</includes>-->
+<!--					</abiSourceFiles> &ndash;&gt;-->
+<!--					<outputDirectory>-->
+<!--						<java>${project.basedir}/web3j/generated</java>-->
+<!--						<bin>${project.basedir}/web3j/generated</bin>-->
+<!--						&lt;!&ndash; <abi>src/web3j/generated</abi> &ndash;&gt;-->
+<!--					</outputDirectory>-->
+<!--				</configuration>-->
 			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/web3j/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 

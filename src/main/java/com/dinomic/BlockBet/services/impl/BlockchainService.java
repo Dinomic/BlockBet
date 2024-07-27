@@ -1,5 +1,6 @@
 package com.dinomic.BlockBet.services.impl;
 
+import com.blockbet.contracts.BlockBetV1;
 import com.dinomic.BlockBet.IBBAppConstant;
 import com.dinomic.BlockBet.entities.Account;
 import com.dinomic.BlockBet.entities.BBTransactionReceipt;
@@ -24,6 +25,7 @@ import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.Transfer;
+import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 
 import java.io.File;
@@ -46,6 +48,17 @@ public class BlockchainService implements IBlockchainService {
 
     @Autowired
     ITransactionReceiptRepo transactionReceiptRepo;
+
+
+    @Override
+    public void deployContract(Wallet from, String password) throws Exception {
+
+        Credentials credentials = Credentials.create(from.getPrivateKey());
+
+        BlockBetV1 contract = BlockBetV1
+             .deploy(web3j, credentials, new DefaultGasProvider(), BigInteger.ONE)
+             .sendAsync().get();
+    }
 
     @Override
     public Wallet createWallet(Account account, String password) throws Exception {

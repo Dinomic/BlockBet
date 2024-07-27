@@ -5,15 +5,17 @@ import com.dinomic.BlockBet.entities.Account;
 import com.dinomic.BlockBet.entities.Wallet;
 import com.dinomic.BlockBet.exception.BlockBetError;
 import com.dinomic.BlockBet.exception.BlockBetException;
+import com.dinomic.BlockBet.security.BlockBetAuthenticationToken;
+import com.dinomic.BlockBet.services.IAccountService;
 import com.dinomic.BlockBet.services.IBlockchainService;
-import org.checkerframework.checker.units.qual.A;
+import com.dinomic.BlockBet.services.impl.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.math.BigInteger;
 
 @RestController
@@ -24,7 +26,13 @@ public class TestController {
     IBlockchainService blockchainService;
 
     @Autowired
+    IAccountService accountService;
+
+    @Autowired
     IDynamoDBService dynamoDBService;
+
+    @Autowired
+    private WalletService walletService;
 
     @GetMapping("/num1")
     public String testNum1() {
@@ -72,5 +80,15 @@ public class TestController {
     public String testNum7() throws Exception {
         dynamoDBService.putItemToTable(null, null);
         return "test num 7 OK";
+    }
+
+    @GetMapping("/num8")
+    public String testNum8() throws Exception {
+        BlockBetAuthenticationToken userDetail = (BlockBetAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        Account account = accountService.getAccountByAccountId(userDetail.getPrincipal().getAccountId());
+        Wallet wallet = walletService.getWallet(account, "0x3e275791625b86f85d536f5e646c9a523b1c0851");
+
+        blockchainService.deployContract(wallet, "password");
+        return "test num 8 OK";
     }
 }
