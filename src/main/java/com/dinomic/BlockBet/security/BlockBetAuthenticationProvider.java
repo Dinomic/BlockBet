@@ -26,7 +26,7 @@ public class BlockBetAuthenticationProvider implements AuthenticationProvider {
 
         BlockBetUserDetail userDetails = (BlockBetUserDetail) userDetailsService.loadUserByUsername(email);
 
-        if(!encoder.matches(password, userDetails.getPassword())){
+        if(!encoder.matches(userDetails.getPassword(), password)){
             throw new AuthenticationCredentialsNotFoundException("bad credential");
         }
 
