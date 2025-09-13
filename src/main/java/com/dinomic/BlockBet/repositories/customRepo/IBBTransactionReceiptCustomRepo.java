@@ -1,6 +1,6 @@
-package com.dinomic.BlockBet.repositories.customRepo;
+package com.dinomic.blockbet.repositories.customRepo;
 
-import com.dinomic.BlockBet.entities.BBTransactionReceipt;
+import com.dinomic.blockbet.entities.BBTransactionReceipt;
 
 import java.math.BigInteger;
 import java.util.List;

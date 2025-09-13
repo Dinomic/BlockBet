@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.aws.dynamodb;
+package com.dinomic.blockbet.aws.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.document.*;
 // import org.apache.logging.log4j.LogManager;

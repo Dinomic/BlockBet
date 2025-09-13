@@ -1,6 +1,6 @@
-package com.dinomic.BlockBet.entities;
+package com.dinomic.blockbet.entities;
 
-import com.dinomic.BlockBet.enums.TransactionType;
+import com.dinomic.blockbet.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 

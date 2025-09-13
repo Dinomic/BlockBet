@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.exception;
+package com.dinomic.blockbet.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

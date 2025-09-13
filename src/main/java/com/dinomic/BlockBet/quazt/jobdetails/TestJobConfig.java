@@ -1,6 +1,6 @@
-package com.dinomic.BlockBet.quazt.jobdetails;
+package com.dinomic.blockbet.quazt.jobdetails;
 
-import com.dinomic.BlockBet.quazt.jobs.TestJob;
+import com.dinomic.blockbet.quazt.jobs.TestJob;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;

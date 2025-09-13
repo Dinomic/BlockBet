@@ -1,7 +1,7 @@
-package com.dinomic.BlockBet.security;
+package com.dinomic.blockbet.security;
 
-import com.dinomic.BlockBet.enums.Role;
-import com.dinomic.BlockBet.security.filters.JwtAuthenticationFilter;
+import com.dinomic.blockbet.enums.Role;
+import com.dinomic.blockbet.security.filters.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

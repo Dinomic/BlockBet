@@ -1,6 +1,6 @@
-package com.dinomic.BlockBet.quazt.jobs;
+package com.dinomic.blockbet.quazt.jobs;
 
-import com.dinomic.BlockBet.services.IBlockchainService;
+import com.dinomic.blockbet.services.IBlockchainService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quartz.JobExecutionContext;

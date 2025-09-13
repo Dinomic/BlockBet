@@ -1,6 +1,6 @@
-package com.dinomic.BlockBet.repositories;
+package com.dinomic.blockbet.repositories;
 
-import com.dinomic.BlockBet.entities.Account;
+import com.dinomic.blockbet.entities.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

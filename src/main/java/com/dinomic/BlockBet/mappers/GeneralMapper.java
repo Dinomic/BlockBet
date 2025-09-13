@@ -1,7 +1,7 @@
-package com.dinomic.BlockBet.mappers;
+package com.dinomic.blockbet.mappers;
 
 import blockbet.openapi.model.ReceiptsGetResponseEntry;
-import com.dinomic.BlockBet.entities.BBTransactionReceipt;
+import com.dinomic.blockbet.entities.BBTransactionReceipt;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

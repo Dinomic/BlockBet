@@ -1,8 +1,8 @@
-package com.dinomic.BlockBet.security;
+package com.dinomic.blockbet.security;
 
-import com.dinomic.BlockBet.entities.Account;
-import com.dinomic.BlockBet.entities.Authority;
-import com.dinomic.BlockBet.services.IAccountService;
+import com.dinomic.blockbet.entities.Account;
+import com.dinomic.blockbet.entities.Authority;
+import com.dinomic.blockbet.services.IAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

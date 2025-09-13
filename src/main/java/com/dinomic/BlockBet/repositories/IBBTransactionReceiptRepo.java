@@ -1,7 +1,7 @@
-package com.dinomic.BlockBet.repositories;
+package com.dinomic.blockbet.repositories;
 
-import com.dinomic.BlockBet.entities.BBTransactionReceipt;
-import com.dinomic.BlockBet.repositories.customRepo.IBBTransactionReceiptCustomRepo;
+import com.dinomic.blockbet.entities.BBTransactionReceipt;
+import com.dinomic.blockbet.repositories.customRepo.IBBTransactionReceiptCustomRepo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

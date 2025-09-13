@@ -1,8 +1,8 @@
-package com.dinomic.BlockBet.services;
+package com.dinomic.blockbet.services;
 
-import com.dinomic.BlockBet.entities.Account;
-import com.dinomic.BlockBet.entities.BBTransactionReceipt;
-import com.dinomic.BlockBet.entities.Wallet;
+import com.dinomic.blockbet.entities.Account;
+import com.dinomic.blockbet.entities.BBTransactionReceipt;
+import com.dinomic.blockbet.entities.Wallet;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;

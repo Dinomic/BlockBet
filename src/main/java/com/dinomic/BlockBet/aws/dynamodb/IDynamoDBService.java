@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.aws.dynamodb;
+package com.dinomic.blockbet.aws.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;

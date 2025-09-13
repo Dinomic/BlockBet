@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: BlockBet authentication API
+  title: blockbet authentication API
   description: This is a sample API used to illustrate the tooling around an API-first approach.
   version: 1.0.0
 servers:

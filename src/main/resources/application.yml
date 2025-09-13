@@ -22,7 +22,7 @@ spring:
       org:
         quartz:
           scheduler:
-            instanceName: BlockBetQuartzScheduler
+            instanceName: blockbetQuartzScheduler
             instanceId: AUTO
           threadPool:
             class: org.quartz.simpl.SimpleThreadPool

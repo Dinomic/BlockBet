@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.enums;
+package com.dinomic.blockbet.enums;
 
 public enum TransactionType {
     FUNDING,

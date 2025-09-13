@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.security.jwt;
+package com.dinomic.blockbet.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

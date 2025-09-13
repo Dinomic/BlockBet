@@ -1,15 +1,15 @@
-package com.dinomic.BlockBet.services.impl;
+package com.dinomic.blockbet.services.impl;
 
 import blockbet.openapi.model.*;
-import com.dinomic.BlockBet.entities.Account;
-import com.dinomic.BlockBet.entities.Wallet;
-import com.dinomic.BlockBet.exception.BlockBetError;
-import com.dinomic.BlockBet.exception.BlockBetException;
-import com.dinomic.BlockBet.mappers.GeneralMapper;
-import com.dinomic.BlockBet.repositories.IBBTransactionReceiptRepo;
-import com.dinomic.BlockBet.repositories.IWalletRepo;
-import com.dinomic.BlockBet.services.IBlockBetService;
-import com.dinomic.BlockBet.services.IBlockchainService;
+import com.dinomic.blockbet.entities.Account;
+import com.dinomic.blockbet.entities.Wallet;
+import com.dinomic.blockbet.exception.BlockBetError;
+import com.dinomic.blockbet.exception.BlockBetException;
+import com.dinomic.blockbet.mappers.GeneralMapper;
+import com.dinomic.blockbet.repositories.IBBTransactionReceiptRepo;
+import com.dinomic.blockbet.repositories.IWalletRepo;
+import com.dinomic.blockbet.services.IBlockBetService;
+import com.dinomic.blockbet.services.IBlockchainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

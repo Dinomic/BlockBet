@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.security;
+package com.dinomic.blockbet.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;

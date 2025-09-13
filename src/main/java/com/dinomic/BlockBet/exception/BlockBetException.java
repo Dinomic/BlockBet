@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.exception;
+package com.dinomic.blockbet.exception;
 
 import lombok.AllArgsConstructor;
 @AllArgsConstructor

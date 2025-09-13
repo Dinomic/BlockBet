@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.security.jwt;
+package com.dinomic.blockbet.security.jwt;
 
 import lombok.Getter;
 import lombok.Setter;

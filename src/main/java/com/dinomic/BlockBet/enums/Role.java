@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.enums;
+package com.dinomic.blockbet.enums;
 
 public enum Role {
     ROLE_BETTOR("BETTOR"),

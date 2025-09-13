@@ -1,14 +1,14 @@
-package com.dinomic.BlockBet.controllers;
+package com.dinomic.blockbet.controllers;
 
-import com.dinomic.BlockBet.aws.dynamodb.IDynamoDBService;
-import com.dinomic.BlockBet.entities.Account;
-import com.dinomic.BlockBet.entities.Wallet;
-import com.dinomic.BlockBet.exception.BlockBetError;
-import com.dinomic.BlockBet.exception.BlockBetException;
-import com.dinomic.BlockBet.security.BlockBetAuthenticationToken;
-import com.dinomic.BlockBet.services.IAccountService;
-import com.dinomic.BlockBet.services.IBlockchainService;
-import com.dinomic.BlockBet.services.impl.WalletService;
+import com.dinomic.blockbet.aws.dynamodb.IDynamoDBService;
+import com.dinomic.blockbet.entities.Account;
+import com.dinomic.blockbet.entities.Wallet;
+import com.dinomic.blockbet.exception.BlockBetError;
+import com.dinomic.blockbet.exception.BlockBetException;
+import com.dinomic.blockbet.security.BlockBetAuthenticationToken;
+import com.dinomic.blockbet.services.IAccountService;
+import com.dinomic.blockbet.services.IBlockchainService;
+import com.dinomic.blockbet.services.impl.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,7 +1,7 @@
-package com.dinomic.BlockBet.quazt.jobdetails;
+package com.dinomic.blockbet.quazt.jobdetails;
 
-import com.dinomic.BlockBet.quazt.jobs.TestJob;
-import com.dinomic.BlockBet.quazt.jobs.TestJob2;
+import com.dinomic.blockbet.quazt.jobs.TestJob;
+import com.dinomic.blockbet.quazt.jobs.TestJob2;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
 import org.quartz.spi.JobFactory;

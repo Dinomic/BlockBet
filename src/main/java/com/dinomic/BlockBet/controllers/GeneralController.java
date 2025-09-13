@@ -1,11 +1,11 @@
-package com.dinomic.BlockBet.controllers;
+package com.dinomic.blockbet.controllers;
 
 import blockbet.openapi.api.BlockbetApi;
 import blockbet.openapi.model.*;
-import com.dinomic.BlockBet.entities.Account;
-import com.dinomic.BlockBet.security.BlockBetAuthenticationToken;
-import com.dinomic.BlockBet.services.IAccountService;
-import com.dinomic.BlockBet.services.IBlockBetService;
+import com.dinomic.blockbet.entities.Account;
+import com.dinomic.blockbet.security.BlockBetAuthenticationToken;
+import com.dinomic.blockbet.services.IAccountService;
+import com.dinomic.blockbet.services.IBlockBetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;

@@ -1,7 +1,7 @@
-package com.dinomic.BlockBet.repositories.customRepo.impl;
+package com.dinomic.blockbet.repositories.customRepo.impl;
 
-import com.dinomic.BlockBet.entities.BBTransactionReceipt;
-import com.dinomic.BlockBet.repositories.customRepo.IBBTransactionReceiptCustomRepo;
+import com.dinomic.blockbet.entities.BBTransactionReceipt;
+import com.dinomic.blockbet.repositories.customRepo.IBBTransactionReceiptCustomRepo;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;

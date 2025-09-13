@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: BlockBet general API
+  title: blockbet general API
   description: This is a sample API used to illustrate the tooling around an API-first approach.
   version: 1.0.0
 servers:

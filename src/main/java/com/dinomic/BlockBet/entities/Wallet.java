@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.entities;
+package com.dinomic.blockbet.entities;
 
 import jakarta.persistence.*;
 

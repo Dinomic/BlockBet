@@ -1,10 +1,10 @@
-package com.dinomic.BlockBet.security;
+package com.dinomic.blockbet.security;
 
 import blockbet.openapi.api.AuthApi;
 import blockbet.openapi.model.AuthLoginPostRequest;
 import blockbet.openapi.model.AuthLoginPostResponse;
 import blockbet.openapi.model.AuthSignUpRequest;
-import com.dinomic.BlockBet.services.IAccountService;
+import com.dinomic.blockbet.services.IAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;

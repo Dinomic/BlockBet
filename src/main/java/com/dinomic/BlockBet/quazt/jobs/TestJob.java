@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.quazt.jobs;
+package com.dinomic.blockbet.quazt.jobs;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

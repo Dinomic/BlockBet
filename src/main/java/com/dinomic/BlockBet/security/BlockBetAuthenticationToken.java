@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.security;
+package com.dinomic.blockbet.security;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

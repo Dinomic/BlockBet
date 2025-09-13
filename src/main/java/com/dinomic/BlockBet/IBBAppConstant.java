@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet;
+package com.dinomic.blockbet;
 
 public interface IBBAppConstant {
     String HEX_PREFIX = "0x";

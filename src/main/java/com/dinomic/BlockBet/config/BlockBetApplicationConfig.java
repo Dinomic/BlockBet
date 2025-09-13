@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.config;
+package com.dinomic.blockbet.config;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

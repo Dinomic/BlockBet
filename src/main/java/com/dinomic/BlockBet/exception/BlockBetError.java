@@ -1,4 +1,4 @@
-package com.dinomic.BlockBet.exception;
+package com.dinomic.blockbet.exception;
 
 public enum BlockBetError {
     BLOCKCHAIN_ERROR(500),

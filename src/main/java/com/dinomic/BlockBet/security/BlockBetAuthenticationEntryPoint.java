@@ -1,6 +1,6 @@
-package com.dinomic.BlockBet.security;
+package com.dinomic.blockbet.security;
 
-import com.dinomic.BlockBet.exception.BlockBetErrorRestResponse;
+import com.dinomic.blockbet.exception.BlockBetErrorRestResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

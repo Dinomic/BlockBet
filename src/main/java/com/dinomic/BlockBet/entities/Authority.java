@@ -1,7 +1,7 @@
-package com.dinomic.BlockBet.entities;
+package com.dinomic.blockbet.entities;
 
 
-import com.dinomic.BlockBet.enums.Role;
+import com.dinomic.blockbet.enums.Role;
 
 import jakarta.persistence.*;
 
