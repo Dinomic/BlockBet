@@ -12,7 +12,7 @@ import org.web3j.protocol.http.HttpService;
 @Configuration
 public class BlockBetApplicationConfig {
 
-    private static Logger LOG = LogManager.getLogger(BlockBetApplicationConfig.class);
+    private final static Logger LOG = LogManager.getLogger(BlockBetApplicationConfig.class);
 
     @Autowired
     BlockchainProperties blockchainProperties;

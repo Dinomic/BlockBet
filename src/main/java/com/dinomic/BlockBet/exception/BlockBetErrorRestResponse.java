@@ -1,6 +1,8 @@
 package com.dinomic.blockbet.exception;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -9,6 +11,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.sql.Timestamp;
 
+@Getter
+@Setter
 @AllArgsConstructor
 public class BlockBetErrorRestResponse {
 
@@ -27,7 +31,8 @@ public class BlockBetErrorRestResponse {
     private String sessionId;
 
     public BlockBetErrorRestResponse(Throwable exception) {
-        LOG.warn("Unhandled exception occurred", exception);
+        this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
+        LOG.error("Session {} Unhandled exception occurred", this.sessionId, exception);
 
         this.errorCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
         this.error = HttpStatus.INTERNAL_SERVER_ERROR.name();
@@ -40,10 +45,11 @@ public class BlockBetErrorRestResponse {
             this.path = RequestContextHolder.currentRequestAttributes().getSessionId();
         }
 
-        this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
     }
 
     public BlockBetErrorRestResponse(String message,  BlockBetError error) {
+        this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
+        LOG.error("Session {} exception occurred - error {} message: {}", this.sessionId, error, message);
 
         this.errorCode = error.getCode();
         this.error = error.name();
@@ -55,11 +61,11 @@ public class BlockBetErrorRestResponse {
         } else {
             this.path = RequestContextHolder.currentRequestAttributes().getSessionId();
         }
-
-        this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
     }
 
     public BlockBetErrorRestResponse(String message,  HttpStatus httpStatus) {
+        this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
+        LOG.error("Session {} exception occurred - error {} message: {}", this.sessionId, error, message);
 
         this.errorCode = httpStatus.value();
         this.error = httpStatus.name();
@@ -71,55 +77,6 @@ public class BlockBetErrorRestResponse {
         } else {
             this.path = RequestContextHolder.currentRequestAttributes().getSessionId();
         }
-
-        this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
     }
 
-    public Timestamp getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Timestamp timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public int getErrorCode() {
-        return errorCode;
-    }
-
-    public void setErrorCode(int errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
-    }
 }
