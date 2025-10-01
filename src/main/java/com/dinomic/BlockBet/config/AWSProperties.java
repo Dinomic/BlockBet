@@ -2,8 +2,6 @@ package com.dinomic.blockbet.config;
 
 import lombok.Getter;
 import lombok.Setter;
-// import org.apache.logging.log4j.LogManager;
-// import org.apache.logging.log4j.Logger;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties("aws")
 public class AWSProperties {
-
-    // private static Logger LOG = LogManager.getLogger(AWSProperties.class);
 
     GeneralProperties general;
     CredentialsProperties credentials;

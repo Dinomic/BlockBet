@@ -1,16 +1,13 @@
 package com.dinomic.blockbet.aws.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.document.*;
-// import org.apache.logging.log4j.LogManager;
-// import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class DynamoDBService implements IDynamoDBService{
-
-    // private static Logger LOG = LogManager.getLogger(DynamoDBService.class);
-
     @Autowired
     DynamoDB dynamoDB;
 

@@ -3,8 +3,7 @@ package com.dinomic.blockbet.exception;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -14,9 +13,8 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 @AllArgsConstructor
+@Slf4j
 public class BlockBetErrorRestResponse {
-
-    private static Logger LOG = LogManager.getLogger(BlockBetErrorRestResponse.class);
 
     private Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 
@@ -32,7 +30,7 @@ public class BlockBetErrorRestResponse {
 
     public BlockBetErrorRestResponse(Throwable exception) {
         this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
-        LOG.error("Session {} Unhandled exception occurred", this.sessionId, exception);
+        log.error("Session {} Unhandled exception occurred", this.sessionId, exception);
 
         this.errorCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
         this.error = HttpStatus.INTERNAL_SERVER_ERROR.name();
@@ -49,7 +47,7 @@ public class BlockBetErrorRestResponse {
 
     public BlockBetErrorRestResponse(String message,  BlockBetError error) {
         this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
-        LOG.error("Session {} exception occurred - error {} message: {}", this.sessionId, error, message);
+        log.error("Session {} exception occurred - error {} message: {}", this.sessionId, error, message);
 
         this.errorCode = error.getCode();
         this.error = error.name();
@@ -65,7 +63,7 @@ public class BlockBetErrorRestResponse {
 
     public BlockBetErrorRestResponse(String message,  HttpStatus httpStatus) {
         this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
-        LOG.error("Session {} exception occurred - error {} message: {}", this.sessionId, error, message);
+        log.error("Session {} exception occurred - error {} message: {}", this.sessionId, error, message);
 
         this.errorCode = httpStatus.value();
         this.error = httpStatus.name();
