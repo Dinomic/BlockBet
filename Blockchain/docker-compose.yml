@@ -1,0 +1,197 @@
+version: '3.8'
+
+networks:
+  eth-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+volumes:
+  bootnode-data:
+
+services:
+  netstats:
+    hostname: netstats
+    environment:
+      - WS_SECRET=my_secret_password_123
+    build:
+      context: ./netstats
+    container_name: netstats
+    ports:
+      - 3000:3000
+    networks:
+      eth-net:
+        ipv4_address: 172.20.0.10
+
+  bootnode:
+    image: ethereum/client-go:v1.13.8
+    container_name: eth-bootnode
+    networks:
+      eth-net:
+        ipv4_address: 172.20.0.100
+    volumes:
+      - bootnode-data:/root/.ethereum
+      - ./genesis.json:/genesis.json
+    ports:
+      - "8545:8545"   # HTTP RPC
+      - "8546:8546"   # WebSocket
+      - "30303:30303" # P2P
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ ! -d /root/.ethereum/geth ]; then
+          geth init /genesis.json
+        fi
+        exec geth \
+          --networkid 12345 \
+          --http \
+          --http.addr "0.0.0.0" \
+          --http.port 8545 \
+          --http.api "eth,net,web3,admin" \
+          --http.corsdomain "*" \
+          --ws \
+          --ws.addr "0.0.0.0" \
+          --ws.port 8546 \
+          --ws.api "eth,net,web3" \
+          --ws.origins "*" \
+          # --nodiscover \
+          --discovery.port 30303 \
+          --port 30303 \
+          --netrestrict 172.20.0.0/16 \
+          --ethstats "bootnode:my_secret_password_123@172.20.0.10:3000"
+
+  # Node 1: Peer Node
+  node1:
+    image: ethereum/client-go:v1.13.8
+    container_name: eth-node1
+    depends_on:
+      - bootnode
+      - netstats
+    networks:
+      eth-net:
+        ipv4_address: 172.20.0.101
+    volumes:
+      - ./genesis.json:/genesis.json
+      - ./node1:/root/.ethereum
+      - ./secrets/node1:/tmp
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ ! -d /root/.ethereum/geth ]; then
+          geth init /genesis.json
+        fi
+
+        echo "node1_account1" > /tmp/accountpassword
+        echo "be4b83a3bff4fd9ec8b060e68fab18a2c0f78ac3943865931dcb73e6303dc48c" > /tmp/privatekey
+
+        if [ ! -d /root/.ethereum/keystore ] || [ -z "$$(ls -A /root/.ethereum/keystore)" ]; then
+          geth account import --password /tmp/accountpassword /tmp/privatekey
+        fi
+
+        while ! geth attach --exec "eth.blockNumber" http://172.20.0.100:8545 > /dev/null 2>&1; do
+          sleep 1
+        done
+        RAW_ENODE=$$(geth attach --exec "admin.nodeInfo.enode" http://172.20.0.100:8545 | tr -d '"\r\n')
+        BOOTNODE_ENODE=$$(echo $$RAW_ENODE | sed 's/127\.0\.0\.1/172.20.0.100/')
+        exec geth \
+          --ipcdisable \
+          --networkid 12345 \
+          --mine \
+          --miner.etherbase "0x4f1809cf76a8946d615cb546271cae3ea36328ed" \
+          --unlock 0x4f1809cf76a8946d615cb546271cae3ea36328ed --password /tmp/accountpassword \
+          --allow-insecure-unlock \
+          --bootnodes "$$BOOTNODE_ENODE" \
+          --netrestrict 172.20.0.0/16 \
+          --ethstats "node1:my_secret_password_123@172.20.0.10:3000"
+
+  # Node 2: Peer Node
+  node2:
+    image: ethereum/client-go:v1.13.8
+    container_name: eth-node2
+    depends_on:
+      - bootnode
+      - netstats
+    networks:
+      eth-net:
+        ipv4_address: 172.20.0.102
+    volumes:
+      - ./genesis.json:/genesis.json
+      - ./node2:/root/.ethereum
+      - ./secrets/node2:/tmp
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ ! -d /root/.ethereum/geth ]; then
+          geth init /genesis.json
+        fi
+
+        echo "node2_account2" > /tmp/accountpassword
+        echo "6342956d853c618c0c029fcb900c2b551e255c4e765a942b34880e4bedcfb188" > /tmp/privatekey
+
+        if [ ! -d /root/.ethereum/keystore ] || [ -z "$$(ls -A /root/.ethereum/keystore)" ]; then
+          geth account import --password /tmp/accountpassword /tmp/privatekey
+        fi
+
+        while ! geth attach --exec "eth.blockNumber" http://172.20.0.100:8545 > /dev/null 2>&1; do
+          sleep 1
+        done
+        RAW_ENODE=$$(geth attach --exec "admin.nodeInfo.enode" http://172.20.0.100:8545 | tr -d '"\r\n')
+        BOOTNODE_ENODE=$$(echo $$RAW_ENODE | sed 's/127\.0\.0\.1/172.20.0.100/')
+        exec geth \
+          --ipcdisable \
+          --networkid 12345 \
+          --mine \
+          --miner.etherbase "0x7d4684e8f1827832f13124b13874b00890a8a83f" \
+          --unlock 0x7d4684e8f1827832f13124b13874b00890a8a83f --password /tmp/accountpassword \
+          --allow-insecure-unlock \
+          --bootnodes "$$BOOTNODE_ENODE" \
+          --netrestrict 172.20.0.0/16 \
+          --ethstats "node2:my_secret_password_123@172.20.0.10:3000"
+
+  # Node 3: Peer Node
+  node3:
+    image: ethereum/client-go:v1.13.8
+    container_name: eth-node3
+    depends_on:
+      - bootnode
+      - netstats
+    networks:
+      eth-net:
+        ipv4_address: 172.20.0.103
+    volumes:
+      - ./genesis.json:/genesis.json
+      - ./node3:/root/.ethereum
+      - ./secrets/node3:/tmp
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ ! -d /root/.ethereum/geth ]; then
+          geth init /genesis.json
+        fi
+
+        echo "node3_account3" > /tmp/accountpassword
+        echo "24fb5370826be6a62e1ee2c9f2ea3ed25cb4ac47c1c2d647b2c788e6cafcf51a" > /tmp/privatekey
+
+        if [ ! -d /root/.ethereum/keystore ] || [ -z "$$(ls -A /root/.ethereum/keystore)" ]; then
+          geth account import --password /tmp/accountpassword /tmp/privatekey
+        fi
+
+        while ! geth attach --exec "eth.blockNumber" http://172.20.0.100:8545 > /dev/null 2>&1; do  
+          sleep 1
+        done
+        RAW_ENODE=$$(geth attach --exec "admin.nodeInfo.enode" http://172.20.0.100:8545 | tr -d '"\r\n')
+        BOOTNODE_ENODE=$$(echo $$RAW_ENODE | sed 's/127\.0\.0\.1/172.20.0.100/')
+        exec geth \
+          --ipcdisable \
+          --networkid 12345 \
+          --mine \
+          --miner.etherbase "0x6206d535d4af9bd3327167027dbb2fffa070fc68" \
+          --unlock 0x6206d535d4af9bd3327167027dbb2fffa070fc68 --password /tmp/accountpassword \
+          --allow-insecure-unlock \
+          --bootnodes "$$BOOTNODE_ENODE" \
+          --netrestrict 172.20.0.0/16 \
+          --ethstats "node3:my_secret_password_123@172.20.0.10:3000"

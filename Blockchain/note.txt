@@ -1,0 +1,1 @@
+for windows (using WSL), Ubuntu-24.04 is recommended
