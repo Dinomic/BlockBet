@@ -1,0 +1,2 @@
+# ignore all the local files in the Blockchain directory after initializing the git repository
+Blockchain/*
