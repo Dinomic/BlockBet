@@ -1,2 +1,5 @@
 # ignore all the local files in the Blockchain directory after initializing the git repository
-Blockchain/*
+Blockchain/node1/*
+Blockchain/node2/*
+Blockchain/node3/*
+Blockchain/secrets/*

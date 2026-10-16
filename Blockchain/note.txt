@@ -1,1 +1,6 @@
 for windows (using WSL), Ubuntu-24.04 is recommended
+
+To reset
+docker compose down -v
+rm -rf node1 node2 node3
+docker compose up
