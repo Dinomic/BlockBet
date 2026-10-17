@@ -3,3 +3,10 @@ Blockchain/node1/*
 Blockchain/node2/*
 Blockchain/node3/*
 Blockchain/secrets/*
+
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
