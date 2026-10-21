@@ -1,3 +1,18 @@
 spring:
   application:
     name: blockbet
+  datasource:
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/blockbetdb?currentSchema=dev
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        default_schema: dev
+  flyway:
+    locations: classpath:db/migration
+    schemas: dev
+    url: jdbc:postgresql://localhost:5432/blockbetdb
+    user: postgres
+    password: postgres
+    baseline-on-migrate: true
