@@ -1,0 +1,182 @@
+openapi: 3.0.1
+info:
+  title: blockbet general API
+  description: This is a sample API used to illustrate the tooling around an API-first approach.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: dev
+paths:
+  /blockbet/wallet:
+    post:
+      summary: create a blockchain wallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletPostRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletPostResponse'
+
+  /blockbet/wallets:
+    get:
+      summary: get wallets infos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletsGetResponse'
+
+  /blockbet/transfer-tokens:
+    put:
+      summary: transfer tokens to another address
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferTokensPutRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferTokensPutResponse'
+
+  /blockbet/receipts:
+    get:
+      summary: get transaction receipts
+      parameters:
+        - in: query
+          name: offset
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptsGetResponse'
+
+
+components:
+  schemas:
+    ReceiptsGetResponse:
+      type: object
+      required:
+        - offset
+        - limit
+        - total
+        - result
+      properties:
+        offset:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReceiptsGetResponseEntry'
+    ReceiptsGetResponseEntry:
+      type: object
+      properties:
+        hash:
+          type: string
+        fromAddress:
+          type: string
+        toAddress:
+          type: string
+        blockHash:
+          type: string
+        blockNumber:
+          type: integer
+        gasUsed:
+          type: integer
+        effectiveGasPrice:
+          type: integer
+
+    TransferTokensPutRequest:
+      type: object
+      required:
+        - fromAddress
+        - fromPrivateKey
+        - toAddress
+        - amount
+      properties:
+        fromAddress:
+          type: string
+        fromPrivateKey:
+          type: string
+        toAddress:
+          type: string
+        amount:
+          description: token amount in wei
+          type: integer
+
+    TransferTokensPutResponse:
+      type: object
+      required:
+        - txHash
+      properties:
+        txHash:
+          type: string
+
+    WalletsGetResponse:
+      type: object
+      properties:
+        wallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Wallet'
+    Wallet:
+      type: object
+      required:
+        - address
+        - publicKey
+        - privateKey
+        - balance
+      properties:
+        address:
+          type: string
+        publicKey:
+          type: string
+        privateKey:
+          type: string
+        balance:
+          description: account balance in wei
+          type: number
+
+    WalletPostRequest:
+      type: object
+      properties:
+        password:
+          type: string
+    WalletPostResponse:
+      type: object
+      required:
+        - address
+        - publicKey
+        - privateKey
+      properties:
+        address:
+          type: string
+        publicKey:
+          type: string
+        privateKey:
+          type: string
