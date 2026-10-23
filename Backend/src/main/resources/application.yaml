@@ -16,3 +16,6 @@ spring:
     user: postgres
     password: postgres
     baseline-on-migrate: true
+security:
+  jwt:
+    secretKey: "superSecretKeyNoOneCanGuess"
