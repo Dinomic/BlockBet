@@ -1,0 +1,19 @@
+info:
+  name: Infos Get
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://localhost:8080/blockbet/infos
+  headers:
+    - name: Authentication
+      value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDIiLCJyb2xlcyI6WyJST0xFX0JFVFRPUiJdLCJleHAiOjE3OTMwMDc3NzYsImVtYWlsIjoiZW1haWwyIn0.rmG3ig5FhAdg4Nm2usUOgPam5lOgDjJAU10RrJRmrWs
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

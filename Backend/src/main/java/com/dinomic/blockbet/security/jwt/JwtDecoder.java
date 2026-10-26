@@ -13,6 +13,7 @@ public class JwtDecoder {
     private JwtProperties properties;
 
     public DecodedJWT decodedJWT (String jwtToken) {
+        //TODO handle expired token
         return JWT.require(Algorithm.HMAC256(properties.secretKey()))
                 .build().verify(jwtToken);
     }

@@ -7,6 +7,17 @@ servers:
   - url: 'http://localhost:8080'
     description: dev
 paths:
+  /blockbet/infos:
+    get:
+      summary: get account infos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfosGetResponse'
+
   /blockbet/wallet:
     post:
       summary: create a blockchain wallet
@@ -75,6 +86,14 @@ paths:
 
 components:
   schemas:
+    InfosGetResponse:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+
     ReceiptsGetResponse:
       type: object
       required:

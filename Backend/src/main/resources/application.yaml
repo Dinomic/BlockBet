@@ -19,3 +19,6 @@ spring:
 security:
   jwt:
     secretKey: "superSecretKeyNoOneCanGuess"
+logging:
+  level:
+    org.springframework.security: DEBUG

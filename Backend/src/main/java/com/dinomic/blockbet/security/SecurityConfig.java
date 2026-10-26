@@ -33,20 +33,23 @@ public class SecurityConfig {
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
-                .securityMatcher("/**")
-                .authorizeHttpRequests(registry -> registry
-                        .requestMatchers("/test/*").permitAll()
-                        .requestMatchers("/v3/api-docs/**",
-                         "/v3/api-docs.yaml",
-                         "/swagger-ui/**",
-                         "/swagger-ui.html").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/bettor/**").hasAnyRole(AccountRole.ROLE_BOOKIE.getRole(), AccountRole.ROLE_BETTOR.getRole())
-                        .anyRequest().authenticated())
-                .exceptionHandling((httpSecurityExceptionHandlingConfigurer ->
-                        httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(authEntryPoint)));
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(AbstractHttpConfigurer::disable)
+            .securityMatcher("/**")
+            .authorizeHttpRequests(registry -> registry
+                .requestMatchers("/test/*").permitAll()
+                .requestMatchers("/v3/api-docs/**",
+                    "/v3/api-docs.yaml",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html").permitAll()
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/blockbet/**")
+                .hasAnyRole(AccountRole.ROLE_BOOKIE.getRole(), AccountRole.ROLE_BETTOR.getRole())
+                .requestMatchers("/bettor/**")
+                .hasAnyRole(AccountRole.ROLE_BETTOR.getRole())
+                .anyRequest().authenticated())
+            .exceptionHandling((httpSecurityExceptionHandlingConfigurer ->
+                httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(authEntryPoint)));
 
         return http.build();
     }
