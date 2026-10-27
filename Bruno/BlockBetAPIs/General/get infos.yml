@@ -1,5 +1,5 @@
 info:
-  name: Infos Get
+  name: get infos
   type: http
   seq: 1
 
@@ -8,7 +8,7 @@ http:
   url: http://localhost:8080/blockbet/infos
   headers:
     - name: Authentication
-      value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDIiLCJyb2xlcyI6WyJST0xFX0JFVFRPUiJdLCJleHAiOjE3OTMwMDc3NzYsImVtYWlsIjoiZW1haWwyIn0.rmG3ig5FhAdg4Nm2usUOgPam5lOgDjJAU10RrJRmrWs
+      value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDIiLCJyb2xlcyI6WyJST0xFX0JFVFRPUiJdLCJleHAiOjE3OTMwOTA5NTIsImVtYWlsIjoiZW1haWwyIn0.imYhPXnBYN4dX8xWqMg33c7K_kADD0VM6w4JtJxFytE
   auth: inherit
 
 settings:

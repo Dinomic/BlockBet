@@ -5,9 +5,12 @@ import blockbet.openapi.model.*;
 import com.dinomic.blockbet.BlockBetUtil;
 import com.dinomic.blockbet.daos.Account;
 import com.dinomic.blockbet.mappers.GeneralMapper;
+import com.dinomic.blockbet.security.BlockBetAuthenticationToken;
 import com.dinomic.blockbet.services.IAccountService;
+import com.dinomic.blockbet.services.IBlockBetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import java.math.BigInteger;
@@ -20,6 +23,9 @@ public class GeneralController implements BlockbetApi {
 
     @Autowired
     BlockBetUtil blockBetUtil;
+
+    @Autowired
+    IBlockBetService blockBetService;
 
     @Override
     public ResponseEntity<InfosGetResponse> blockbetInfosGet() {
@@ -40,7 +46,8 @@ public class GeneralController implements BlockbetApi {
 
     @Override
     public ResponseEntity<WalletPostResponse> blockbetWalletPost(WalletPostRequest walletPostRequest) {
-        return null;
+        Account account = blockBetUtil.getAccountFromRequest();
+        return ResponseEntity.ok(blockBetService.handleWalletPostRequest(account, walletPostRequest));
     }
 
     @Override

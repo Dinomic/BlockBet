@@ -1,0 +1,25 @@
+info:
+  name: create wallet
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:8080/blockbet/wallet
+  headers:
+    - name: Authentication
+      value: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDIiLCJyb2xlcyI6WyJST0xFX0JFVFRPUiJdLCJleHAiOjE3OTMwOTIwMTksImVtYWlsIjoiZW1haWwyIn0.XvgNtBlJoTTyayuqYLF7maj0h5MgzYujqxTB8aZAESY
+  body:
+    type: json
+    data: |-
+      {
+        "password": "hehe"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

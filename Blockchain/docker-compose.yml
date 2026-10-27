@@ -71,6 +71,8 @@ services:
     networks:
       eth-net:
         ipv4_address: 172.20.0.101
+    ports:
+      - 8301:8545
     volumes:
       - ./genesis.json:/genesis.json
       - ./node1:/root/.ethereum
@@ -95,6 +97,18 @@ services:
         done
         RAW_ENODE=$$(geth attach --exec "admin.nodeInfo.enode" http://172.20.0.100:8545 | tr -d '"\r\n')
         BOOTNODE_ENODE=$$(echo $$RAW_ENODE | sed 's/127\.0\.0\.1/172.20.0.100/')
+        
+        (
+          while true; do
+            sleep 20
+            if geth attach --exec "net.peerCount" http://127.0.0.1:8545 > /dev/null 2>&1; then
+              PEERS=$$(geth attach --exec "admin.peers.map(p => p.enode).join(' ')" http://172.20.0.100:8545 | tr -d '"\r\n' | sed 's/:[0-9][0-9]*/:30303/g')
+              for PEER in $$PEERS; do
+                geth attach --exec "admin.addPeer('$$PEER')" http://127.0.0.1:8545 > /dev/null 2>&1
+              done
+            fi
+          done
+        ) &
         exec geth \
           --ipcdisable \
           --networkid 12345 \
@@ -104,7 +118,12 @@ services:
           --allow-insecure-unlock \
           --bootnodes "$$BOOTNODE_ENODE" \
           --netrestrict 172.20.0.0/16 \
-          --ethstats "node1:my_secret_password_123@172.20.0.10:3000"
+          --ethstats "node1:my_secret_password_123@172.20.0.10:3000" \
+          --http \
+          --http.addr "0.0.0.0" \
+          --http.port 8545 \
+          --http.api "eth,net,web3,personal,miner,admin" \
+          --http.corsdomain "*"
 
   # Node 2: Peer Node
   node2:
@@ -116,6 +135,8 @@ services:
     networks:
       eth-net:
         ipv4_address: 172.20.0.102
+    ports:
+      - 8302:8545
     volumes:
       - ./genesis.json:/genesis.json
       - ./node2:/root/.ethereum
@@ -140,6 +161,18 @@ services:
         done
         RAW_ENODE=$$(geth attach --exec "admin.nodeInfo.enode" http://172.20.0.100:8545 | tr -d '"\r\n')
         BOOTNODE_ENODE=$$(echo $$RAW_ENODE | sed 's/127\.0\.0\.1/172.20.0.100/')
+        
+        (
+          while true; do
+            sleep 20
+            if geth attach --exec "net.peerCount" http://127.0.0.1:8545 > /dev/null 2>&1; then
+              PEERS=$$(geth attach --exec "admin.peers.map(p => p.enode).join(' ')" http://172.20.0.100:8545 | tr -d '"\r\n' | sed 's/:[0-9][0-9]*/:30303/g')
+              for PEER in $$PEERS; do
+                geth attach --exec "admin.addPeer('$$PEER')" http://127.0.0.1:8545 > /dev/null 2>&1
+              done
+            fi
+          done
+        ) &
         exec geth \
           --ipcdisable \
           --networkid 12345 \
@@ -149,7 +182,12 @@ services:
           --allow-insecure-unlock \
           --bootnodes "$$BOOTNODE_ENODE" \
           --netrestrict 172.20.0.0/16 \
-          --ethstats "node2:my_secret_password_123@172.20.0.10:3000"
+          --ethstats "node2:my_secret_password_123@172.20.0.10:3000" \
+          --http \
+          --http.addr "0.0.0.0" \
+          --http.port 8545 \
+          --http.api "eth,net,web3,personal,miner,admin" \
+          --http.corsdomain "*"
 
   # Node 3: Peer Node
   node3:
@@ -161,6 +199,8 @@ services:
     networks:
       eth-net:
         ipv4_address: 172.20.0.103
+    ports:
+      - 8303:8545
     volumes:
       - ./genesis.json:/genesis.json
       - ./node3:/root/.ethereum
@@ -185,6 +225,18 @@ services:
         done
         RAW_ENODE=$$(geth attach --exec "admin.nodeInfo.enode" http://172.20.0.100:8545 | tr -d '"\r\n')
         BOOTNODE_ENODE=$$(echo $$RAW_ENODE | sed 's/127\.0\.0\.1/172.20.0.100/')
+        
+        (
+          while true; do
+            sleep 20
+            if geth attach --exec "net.peerCount" http://127.0.0.1:8545 > /dev/null 2>&1; then
+              PEERS=$$(geth attach --exec "admin.peers.map(p => p.enode).join(' ')" http://172.20.0.100:8545 | tr -d '"\r\n' | sed 's/:[0-9][0-9]*/:30303/g')
+              for PEER in $$PEERS; do
+                geth attach --exec "admin.addPeer('$$PEER')" http://127.0.0.1:8545 > /dev/null 2>&1
+              done
+            fi
+          done
+        ) &
         exec geth \
           --ipcdisable \
           --networkid 12345 \
@@ -194,4 +246,9 @@ services:
           --allow-insecure-unlock \
           --bootnodes "$$BOOTNODE_ENODE" \
           --netrestrict 172.20.0.0/16 \
-          --ethstats "node3:my_secret_password_123@172.20.0.10:3000"
+          --ethstats "node3:my_secret_password_123@172.20.0.10:3000" \
+          --http \
+          --http.addr "0.0.0.0" \
+          --http.port 8545 \
+          --http.api "eth,net,web3,personal,miner,admin" \
+          --http.corsdomain "*"
