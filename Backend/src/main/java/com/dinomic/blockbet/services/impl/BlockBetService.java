@@ -1,15 +1,22 @@
 package com.dinomic.blockbet.services.impl;
 
-import blockbet.openapi.model.WalletPostRequest;
-import blockbet.openapi.model.WalletPostResponse;
+import blockbet.openapi.model.*;
 import com.dinomic.blockbet.daos.Account;
 import com.dinomic.blockbet.daos.Wallet;
+import com.dinomic.blockbet.exceptions.BlockBetError;
+import com.dinomic.blockbet.exceptions.BlockBetException;
 import com.dinomic.blockbet.repositories.IBBTransactionReceiptRepo;
 import com.dinomic.blockbet.repositories.IWalletRepo;
 import com.dinomic.blockbet.services.IBlockBetService;
 import com.dinomic.blockbet.services.IBlockchainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class BlockBetService implements IBlockBetService {
@@ -42,5 +49,52 @@ public class BlockBetService implements IBlockBetService {
         blockchainService.transferEthFromFaucet(newWallet.getAddress(), 10);
 
         return response;
+    }
+
+    @Override
+    public WalletsGetResponse handleWalletsGetRequest(Account account) {
+        WalletsGetResponse response = new WalletsGetResponse();
+
+        List<Wallet> accountWallets = walletRepo.findAllByAccount(account);
+
+        Map<String, BigInteger> walletBalances = blockchainService.getWalletBalances(
+            accountWallets.stream().map(Wallet::getAddress).collect(Collectors.toList()));
+
+        for (Wallet wallet : accountWallets) {
+            blockbet.openapi.model.Wallet responseWallet = new blockbet.openapi.model.Wallet();
+
+            responseWallet.setAddress(wallet.getAddress());
+            responseWallet.setPublicKey(wallet.getPublicKey());
+            responseWallet.setPrivateKey(wallet.getPrivateKey());
+            responseWallet.setBalance(new BigDecimal(walletBalances.getOrDefault(wallet.getAddress(), BigInteger.ZERO)));
+
+            response.addWalletsItem(responseWallet);
+        }
+
+        return response;
+    }
+
+    @Override
+    public TransferTokensPutResponse handleTransferTokensPutRequest(Account account, TransferTokensPutRequest request) {
+        TransferTokensPutResponse response = new TransferTokensPutResponse();
+
+        Wallet fromWallet = walletRepo.findByAccountAndAddress(account, request.getFromAddress()).orElseThrow(() ->
+            new BlockBetException(BlockBetError.WALLET_NOT_FOUND, "Wallet not found with associated account")
+        );
+
+        if (!fromWallet.getPrivateKey().equals(request.getFromPrivateKey())) {
+            throw new BlockBetException(BlockBetError.INPUT_PRIVATE_KEY_NOT_MATCH, "input private key not match");
+        }
+
+        response.setTxHash(blockchainService.transferEth(fromWallet, request.getToAddress(),
+            request.getAmount()));
+
+
+        return response;
+    }
+
+    @Override
+    public ReceiptsGetResponse handleReceiptsGetRequest(BigInteger offset, BigInteger limit) {
+        return null;
     }
 }

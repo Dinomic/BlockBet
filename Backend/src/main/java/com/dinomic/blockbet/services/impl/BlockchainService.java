@@ -6,6 +6,8 @@ import com.dinomic.blockbet.daos.Account;
 import com.dinomic.blockbet.daos.BBTransactionReceipt;
 import com.dinomic.blockbet.daos.Wallet;
 import com.dinomic.blockbet.enums.TransactionType;
+import com.dinomic.blockbet.exceptions.BlockBetError;
+import com.dinomic.blockbet.exceptions.BlockBetException;
 import com.dinomic.blockbet.repositories.IBBTransactionReceiptRepo;
 import com.dinomic.blockbet.repositories.IWalletRepo;
 import com.dinomic.blockbet.services.IBlockchainService;
@@ -15,8 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
@@ -24,7 +31,12 @@ import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class BlockchainService implements IBlockchainService {
@@ -101,5 +113,60 @@ public class BlockchainService implements IBlockchainService {
         result.setSuccess(Boolean.TRUE.equals(isSuccess));
 
         return result;
+    }
+
+
+    @Override
+    public Map<String, BigInteger> getWalletBalances(List<String> walletAddresses) {
+        Map<String, BigInteger> result = new HashMap<>();
+
+        for (String address : walletAddresses) {
+            result.put(address, getWalletBalance(address));
+        }
+
+        return result;
+    }
+
+    @Override
+    public BigInteger getWalletBalance(String walletAddress) {
+        try {
+            EthGetBalance ethGetBalance = web3j.ethGetBalance(walletAddress,
+                DefaultBlockParameterName.LATEST).send();
+
+            return ethGetBalance.getBalance();
+        } catch (IOException e) {
+            throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR, "Error getting wallet balance");
+        }
+    }
+
+    @Override
+    public String transferEth(Wallet from, String toAddress, BigInteger weiAmount) {
+
+        try {
+            EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
+                from.getAddress(), DefaultBlockParameterName.PENDING).sendAsync().get();
+            BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+            BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+
+            RawTransaction rawTransaction  = RawTransaction.createEtherTransaction(
+                nonce, gasPrice, Transfer.GAS_LIMIT, toAddress, weiAmount);
+
+            Credentials credentials = Credentials.create(from.getPrivateKey());
+            RawTransactionManager rawTransactionManager = new RawTransactionManager(web3j, credentials, blockchainProperties.network().chainId());
+
+            EthSendTransaction ethSendTransaction = rawTransactionManager.signAndSend(rawTransaction);
+            String txHash = ethSendTransaction.getTransactionHash();
+
+            BBTransactionReceipt decoyReceipt = new BBTransactionReceipt();
+            decoyReceipt.setHash(txHash);
+            decoyReceipt.setFromAddress(from.getAddress());
+            decoyReceipt.setToAddress(toAddress);
+            decoyReceipt.setTransactionType(TransactionType.TOKEN_TRANSFER);
+            transactionReceiptRepo.save(decoyReceipt);
+
+            return txHash;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
