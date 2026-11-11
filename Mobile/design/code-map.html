@@ -1,0 +1,433 @@
+<title>Bản đồ BlockBet Mobile</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+  /* Layout: one reading column; layer colors carry meaning (presentation / domain / data / core) everywhere. */
+  :root {
+    --bg: #FAF8F3; --surface: #FFFFFF; --ink: #14110A; --muted: #6B6454; --line: #D6CDB8;
+    --gold: #D4A017; --gold-text: #8A6100; --code-bg: #F1EDE2;
+    --pres: #2F63C8; --dom: #A87700; --data: #0B8A5E; --core: #6B6454;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-head: "Space Grotesk", "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E0C08; --surface: #181510; --ink: #F3EEE3; --muted: #A39A85; --line: #3B3425;
+      --gold: #F5C542; --gold-text: #F5C542; --code-bg: #120F0A;
+      --pres: #7FB0FF; --dom: #F5C542; --data: #3DDC97; --core: #A39A85; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0E0C08; --surface: #181510; --ink: #F3EEE3; --muted: #A39A85; --line: #3B3425;
+    --gold: #F5C542; --gold-text: #F5C542; --code-bg: #120F0A;
+    --pres: #7FB0FF; --dom: #F5C542; --data: #3DDC97; --core: #A39A85; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6;
+    padding-block: 32px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  main { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+  h1, h2, h3 { font-family: var(--font-head); text-wrap: balance; margin: 0; line-height: 1.15; }
+  h1 { font-size: clamp(30px, 6vw, 44px); letter-spacing: -0.02em; }
+  h2 { font-size: 26px; letter-spacing: -0.015em; }
+  h3 { font-size: 17px; }
+  p { margin: 0; }
+  code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .lead { color: var(--muted); font-size: 17px; max-width: 60ch; margin-top: 12px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold-text); margin-bottom: 8px; }
+  section { display: flex; flex-direction: column; gap: 20px; }
+  .sec-intro { color: var(--muted); max-width: 64ch; }
+
+  /* layer chips */
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px;
+    color: var(--c); background: color-mix(in srgb, var(--c) 13%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c) 35%, var(--surface)); white-space: nowrap; }
+  .chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+  .pres { --c: var(--pres); } .dom { --c: var(--dom); } .data { --c: var(--data); } .core { --c: var(--core); }
+
+  /* 1. before / after */
+  .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .card ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .fake-file { border: 1.5px dashed var(--line); border-radius: 12px; padding: 12px; font-family: var(--font-mono); font-size: 12.5px; display: flex; flex-direction: column; gap: 6px; }
+  .fake-file b { font-weight: 500; padding: 3px 8px; border-radius: 6px; color: var(--ink); background: color-mix(in srgb, var(--c) 16%, var(--surface)); border-left: 3px solid var(--c); }
+
+  /* 2. layers */
+  .layers { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 10px; align-items: stretch; }
+  .layer { background: color-mix(in srgb, var(--c) 8%, var(--surface)); border: 1.5px solid color-mix(in srgb, var(--c) 45%, var(--surface)); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .layer .role { font-family: var(--font-head); font-weight: 700; font-size: 18px; color: var(--c); }
+  .layer .meta { font-size: 13.5px; color: var(--muted); }
+  .layer .folder { font-family: var(--font-mono); font-size: 12px; color: var(--ink); background: var(--code-bg); border-radius: 6px; padding: 2px 8px; align-self: flex-start; }
+  .arrow { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; gap: 2px; text-align: center; }
+  .arrow .a { font-size: 26px; line-height: 1; color: var(--ink); }
+  .corebar { background: color-mix(in srgb, var(--core) 8%, var(--surface)); border: 1.5px dashed color-mix(in srgb, var(--core) 50%, var(--surface)); border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .rule { border-left: 4px solid var(--gold); padding: 4px 0 4px 16px; }
+  .rule b { font-family: var(--font-head); }
+  @media (max-width: 720px) {
+    .layers { grid-template-columns: 1fr; }
+    .arrow { flex-direction: row; gap: 8px; } .arrow .a { transform: rotate(90deg); }
+  }
+  .trio { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  .trio > div { background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+  .trio b { font-family: var(--font-head); display: block; margin-bottom: 2px; }
+  .trio span { color: var(--muted); font-size: 14px; }
+
+  /* 3. stepper */
+  .stepper { background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 18px; }
+  .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .lane { border-radius: 12px; padding: 10px 8px; text-align: center; font-size: 13px; font-weight: 600; color: var(--c);
+    border: 1.5px solid color-mix(in srgb, var(--c) 30%, var(--surface)); background: color-mix(in srgb, var(--c) 6%, var(--surface)); transition: background .2s, border-color .2s, transform .2s; }
+  .lane small { display: block; font-weight: 400; color: var(--muted); font-size: 11.5px; }
+  .lane.on { background: color-mix(in srgb, var(--c) 22%, var(--surface)); border-color: var(--c); transform: translateY(-2px); }
+  .dots { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dot { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); font-weight: 600; font-size: 14px; }
+  .dot.done { border-color: color-mix(in srgb, var(--c) 60%, var(--surface)); color: var(--c); }
+  .dot.on { background: var(--c); border-color: var(--c); color: var(--bg); }
+  .detail { display: flex; flex-direction: column; gap: 10px; min-height: 250px; }
+  .detail .file { font-family: var(--font-mono); font-size: 13px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; overflow-x: auto; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.55; }
+  .nav { display: flex; gap: 10px; }
+  .btn { border: 1.5px solid var(--line); background: var(--surface); border-radius: 12px; padding: 9px 16px; font-weight: 600; font-size: 14px; }
+  .btn.primary { background: var(--gold); border-color: var(--gold); color: #1A1405; }
+  .btn:disabled { opacity: .45; cursor: default; }
+
+  /* 4. file explorer */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filter { border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 14px; font-size: 13.5px; font-weight: 500; }
+  .filter[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .folder-block { display: flex; flex-direction: column; gap: 6px; }
+  .folder-name { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); padding: 6px 0 2px; }
+  .frow { background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .frow > button { width: 100%; background: none; border: 0; padding: 10px 14px; display: flex; gap: 10px; align-items: center; text-align: left; flex-wrap: wrap; }
+  .frow .name { font-family: var(--font-mono); font-size: 13.5px; font-weight: 500; flex: 1 1 180px; min-width: 0; overflow-wrap: anywhere; }
+  .frow .one { color: var(--muted); font-size: 13.5px; flex: 1 1 100%; }
+  .frow .more { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 8px; color: var(--ink); }
+  .frow .more p { max-width: 70ch; }
+  .frow[data-open="true"] { border-color: color-mix(in srgb, var(--c) 55%, var(--surface)); }
+
+  /* 5. backend */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+  .tablewrap { overflow-x: auto; background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px; }
+  .cmd { position: relative; }
+  .cmd pre { padding-right: 76px; }
+  .copy { position: absolute; top: 8px; right: 8px; font-size: 12px; padding: 4px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); }
+  .checklist { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: c; }
+  .checklist li { counter-increment: c; display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+  .checklist li::before { content: counter(c); flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: #1A1405; font-weight: 700; font-size: 13px; display: grid; place-items: center; }
+  .checklist li > div { min-width: 0; }
+  .note { background: color-mix(in srgb, var(--gold) 12%, var(--surface)); border: 1.5px solid color-mix(in srgb, var(--gold) 40%, var(--surface)); border-radius: 14px; padding: 12px 16px; font-size: 14px; }
+  @media (prefers-reduced-motion: reduce) { .lane { transition: none; } }
+</style>
+
+<main>
+  <header>
+    <div class="eyebrow">BlockBet Mobile · lib/</div>
+    <h1>Bản đồ code của app</h1>
+    <p class="lead">33 file trong <code>Mobile/lib</code> trông nhiều, nhưng chỉ làm một việc quen thuộc: hiện form, gửi email và mật khẩu lên server, lưu token. Trang này chỉ ra mỗi file đứng ở đâu và vì sao.</p>
+  </header>
+
+  <!-- 1 -->
+  <section aria-labelledby="s1">
+    <div><div class="eyebrow">1 · Ý tưởng</div><h2 id="s1">Tách việc ra, thay vì dồn vào một file</h2></div>
+    <p class="sec-intro">Cách đơn giản bạn đã biết: một <code>StatefulWidget</code> lo hết. Clean architecture chia đúng những việc đó ra thành các file nhỏ, mỗi file một nhiệm vụ.</p>
+    <div class="compare">
+      <div class="card">
+        <h3>Cách đơn giản</h3>
+        <div class="fake-file">
+          <b style="--c: var(--core)">login_page.dart</b>
+          <span>· vẽ form</span><span>· kiểm tra email</span><span>· gọi http.post(...)</span><span>· đọc JSON</span><span>· lưu token</span><span>· setState(loading)</span>
+        </div>
+        <ul><li>Nhanh khi app nhỏ.</li><li>Đổi API hay đổi giao diện đều phải mở cùng một file.</li><li>Khó viết test vì mọi thứ dính vào nhau.</li></ul>
+      </div>
+      <div class="card">
+        <h3>Cách trong app này</h3>
+        <div class="fake-file">
+          <b class="pres" style="--c: var(--pres)">login_page.dart · chỉ vẽ form</b>
+          <b style="--c: var(--pres)">auth_bloc.dart · giữ trạng thái</b>
+          <b style="--c: var(--dom)">login.dart · "đăng nhập" là gì</b>
+          <b style="--c: var(--data)">auth_remote_data_source.dart · gọi API</b>
+        </div>
+        <ul><li>Đổi API chỉ sửa tầng Data, giao diện không bị động.</li><li>Test logic mà không cần mở màn hình hay server.</li><li>Thêm tính năng mới (cược, ví) theo đúng khuôn này.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section aria-labelledby="s2">
+    <div><div class="eyebrow">2 · Ba tầng</div><h2 id="s2">Mỗi tầng một nhiệm vụ</h2></div>
+    <div class="layers" role="group" aria-label="Ba tầng của clean architecture">
+      <div class="layer pres">
+        <span class="chip">Presentation</span>
+        <div class="role">Giao diện</div>
+        <div class="meta">Màn hình, nút bấm và <b>Bloc</b> giữ trạng thái màn hình. Nó chỉ biết hỏi tầng Domain.</div>
+        <span class="folder">features/auth/presentation</span>
+      </div>
+      <div class="arrow"><span class="a">→</span><span>gọi</span></div>
+      <div class="layer dom">
+        <span class="chip">Domain</span>
+        <div class="role">Quy tắc</div>
+        <div class="meta">Định nghĩa "đăng nhập", "đăng ký" là gì. Thuần Dart, <b>không biết</b> Flutter, Dio hay server.</div>
+        <span class="folder">features/auth/domain</span>
+      </div>
+      <div class="arrow"><span class="a">←</span><span>làm theo</span></div>
+      <div class="layer data">
+        <span class="chip">Data</span>
+        <div class="role">Kho và mạng</div>
+        <div class="meta">Gọi API thật, lưu token vào máy. Làm đúng những gì Domain yêu cầu.</div>
+        <span class="folder">features/auth/data</span>
+      </div>
+    </div>
+    <div class="corebar">
+      <span class="chip core">Core</span>
+      <span style="flex: 1 1 260px; color: var(--muted); font-size: 14px;">Đồ dùng chung cho mọi tính năng: theme, router, kiểu lỗi, API client, DI. Nằm ở <code>lib/core</code>.</span>
+    </div>
+    <div class="rule"><b>Quy tắc duy nhất cần nhớ:</b> Presentation và Data cùng phụ thuộc vào Domain, còn Domain không phụ thuộc ai. Nếu mở file trong <code>domain/</code> mà thấy <code>import 'package:dio/...'</code> hay <code>flutter/material.dart</code> thì sai chỗ.</div>
+
+    <h3>Bloc thay cho setState</h3>
+    <div class="trio">
+      <div><b>Event</b><span>Việc người dùng làm. Ví dụ <code>LoginSubmitted(email, password)</code>.</span></div>
+      <div><b>Bloc</b><span>Nhận event, xử lý, rồi báo trạng thái mới. Ở đây là <code>AuthBloc</code>.</span></div>
+      <div><b>State</b><span>Ảnh chụp màn hình lúc này: đang tải? có lỗi? đã đăng nhập chưa?</span></div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section aria-labelledby="s3">
+    <div><div class="eyebrow">3 · Theo dấu một cú bấm</div><h2 id="s3">Bấm "Log in" thì chuyện gì xảy ra?</h2></div>
+    <p class="sec-intro">Bấm qua từng bước. Dải ba ô bên dưới cho biết yêu cầu đang ở tầng nào.</p>
+    <div class="stepper">
+      <div class="lanes" aria-hidden="true">
+        <div class="lane pres" data-lane="pres">Presentation<small>giao diện</small></div>
+        <div class="lane dom" data-lane="dom">Domain<small>quy tắc</small></div>
+        <div class="lane data" data-lane="data">Data<small>API và lưu trữ</small></div>
+      </div>
+      <div class="dots" id="dots" role="tablist" aria-label="Các bước"></div>
+      <div class="detail" id="detail" aria-live="polite"></div>
+      <div class="nav">
+        <button class="btn" id="prev">← Trước</button>
+        <button class="btn primary" id="next">Tiếp →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section aria-labelledby="s4">
+    <div><div class="eyebrow">4 · Từng file</div><h2 id="s4">Tất cả 33 file</h2></div>
+    <p class="sec-intro">Màu chấm cho biết file thuộc tầng nào. Bấm vào một file để đọc giải thích.</p>
+    <div class="filters" id="filters" role="group" aria-label="Lọc theo tầng"></div>
+    <div id="files" style="display:flex; flex-direction:column; gap:14px;"></div>
+  </section>
+
+  <!-- 5 -->
+  <section aria-labelledby="s5">
+    <div><div class="eyebrow">5 · Kết nối backend</div><h2 id="s5">Chạy backend trên máy bạn thì chỉnh ở đâu?</h2></div>
+    <p class="sec-intro">Chỉ có một chỗ cần đổi: địa chỉ server, nằm trong <code>lib/core/config/app_config.dart</code>. Địa chỉ đúng phụ thuộc vào app đang chạy ở đâu, vì từ trong emulator, <code>localhost</code> là chính chiếc điện thoại ảo chứ không phải máy tính của bạn.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>App chạy trên</th><th>Địa chỉ backend</th><th>Phải đổi?</th></tr></thead>
+        <tbody>
+          <tr><td>Android emulator</td><td><code>http://10.0.2.2:8080</code><br><span style="color:var(--muted)">10.0.2.2 là cách emulator gọi máy tính của bạn</span></td><td>Không, đây là mặc định</td></tr>
+          <tr><td>iOS simulator, Windows desktop, Chrome</td><td><code>http://localhost:8080</code></td><td>Có</td></tr>
+          <tr><td>Điện thoại thật (cùng Wi-Fi)</td><td><code>http://&lt;IP máy tính&gt;:8080</code><br><span style="color:var(--muted)">xem IP bằng <code>ipconfig</code>, dòng IPv4</span></td><td>Có, và mở cổng 8080 trong Windows Firewall</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Cách đổi, không cần sửa code</h3>
+    <div class="cmd"><pre id="c1">flutter run --dart-define=API_BASE_URL=http://192.168.1.10:8080</pre><button class="copy" data-for="c1">Sao chép</button></div>
+    <p class="sec-intro">Thay <code>192.168.1.10</code> bằng IP máy bạn. Muốn đổi vĩnh viễn thì sửa <code>defaultValue</code> trong <code>app_config.dart</code>.</p>
+
+    <h3>Checklist trước khi bấm Log in</h3>
+    <ol class="checklist">
+      <li><div><b>Backend đang chạy</b> ở cổng 8080. Theo <code>application.yaml</code> nó cần PostgreSQL ở <code>localhost:5432</code>, database <code>blockbetdb</code>. Nếu sign-up có tạo ví hoặc nạp ETH thì bật thêm mạng geth trong <code>Blockchain/</code> (<code>docker compose up</code>).</div></li>
+      <li><div><b>Thử API trước bằng Bruno</b> (thư mục <code>Bruno/BlockBetAPIs</code>): gọi <code>auth-sign-up</code> rồi <code>auth-login</code>. Nếu Bruno chạy mà app không chạy thì lỗi nằm ở địa chỉ hoặc quyền mạng của app.</div></li>
+      <li><div><b>Android chặn http:// mặc định</b> từ Android 9. Tôi đã thêm <code>usesCleartextTraffic</code> vào bản debug và quyền <code>INTERNET</code> vào bản chính (<code>android/app/src/debug</code> và <code>main</code>). Khi lên production hãy dùng https và bỏ dòng cleartext.</div></li>
+      <li><div><b>Gỡ app cũ và chạy lại</b> sau khi sửa manifest, vì thay đổi trong thư mục <code>android/</code> không áp dụng bằng hot reload.</div></li>
+    </ol>
+    <div class="note">Không bị lỗi CORS ở app mobile. CORS chỉ ảnh hưởng khi chạy bản web (Chrome); khi đó backend cần cho phép origin của Flutter web.</div>
+  </section>
+</main>
+
+<script>
+  var LAYER = { pres: 'Presentation', dom: 'Domain', data: 'Data', core: 'Core' };
+
+  /* ---------- 3. stepper ---------- */
+  var STEPS = [
+    { lane: 'pres', file: 'login_page.dart', title: 'Bạn bấm nút, form kiểm tra dữ liệu',
+      text: 'Trang đăng nhập kiểm tra email và mật khẩu có hợp lệ không. Nếu có lỗi thì hiện chữ đỏ ngay tại chỗ và dừng lại. Nếu hợp lệ, nó không tự gọi server mà chỉ gửi một Event cho Bloc.',
+      code: 'context.read<AuthBloc>().add(\n  LoginSubmitted(email: _email.text, password: _password.text),\n);' },
+    { lane: 'pres', file: 'auth_bloc.dart', title: 'Bloc nhận Event và bật trạng thái "đang tải"',
+      text: 'AuthBloc phát ra State mới với isSubmitting = true. Trang đăng nhập lắng nghe State đó nên nút đổi thành "Logging in…" và các ô bị khoá.',
+      code: 'emit(state.copyWith(isSubmitting: true, clearError: true));\nfinal result = await _login(LoginParams(...));' },
+    { lane: 'dom', file: 'login.dart (usecase)', title: 'Usecase: "đăng nhập" là một hành động riêng',
+      text: 'Bloc không gọi thẳng server. Nó gọi usecase Login. Usecase này rất mỏng, chỉ chuyển yêu cầu cho repository. Giá trị của nó là gói một việc nghiệp vụ thành một tên gọi rõ ràng.',
+      code: 'Future<Result<AuthSession>> call(LoginParams p) =>\n    _repository.login(email: p.email, password: p.password);' },
+    { lane: 'dom', file: 'auth_repository.dart', title: 'Repository ở Domain chỉ là bản hợp đồng',
+      text: 'File này chỉ khai báo "phải có hàm login trả về AuthSession hoặc lỗi". Nó không nói làm bằng cách nào. Nhờ vậy Domain không biết server hay Dio là gì.',
+      code: 'abstract class AuthRepository {\n  Future<Result<AuthSession>> login({required String email, required String password});\n}' },
+    { lane: 'data', file: 'auth_repository_impl.dart', title: 'Bản thực hiện hợp đồng: gọi server rồi lưu token',
+      text: 'Đây là nơi hợp đồng thành việc thật. Nó gọi nguồn dữ liệu từ xa, nếu thành công thì lưu token. Mọi exception được bắt lại và đổi thành Failure có câu thông báo sẵn, để tầng trên không bị crash.',
+      code: 'final session = await remote.login(email: email, password: password);\nawait local.saveToken(session.token);\nreturn session;   // bọc trong Success(...)' },
+    { lane: 'data', file: 'auth_remote_data_source.dart', title: 'Gọi API thật bằng Dio',
+      text: 'POST /auth/login với body {email, password}. ApiClient trong core đã gắn địa chỉ server (app_config.dart). Nếu server trả 401 hay mất mạng, nó ném exception để repository xử lý.',
+      code: "await _client.dio.post('/auth/login',\n    data: {'email': email, 'password': password});" },
+    { lane: 'data', file: 'auth_local_data_source.dart', title: 'Server trả {token}, app cất vào két an toàn',
+      text: 'Backend trả về một JWT. Token được lưu bằng flutter_secure_storage (mã hoá bởi hệ điều hành), nên lần sau mở app vẫn còn đăng nhập. AuthSessionModel còn đọc email trong token để Home hiển thị.',
+      code: "await _storage.write(key: 'auth_token', value: token);" },
+    { lane: 'pres', file: 'auth_bloc.dart → app_router.dart', title: 'Kết quả đi ngược lên, màn hình tự đổi',
+      text: 'Kết quả Success quay về Bloc, Bloc phát State authenticated. Router đang theo dõi State này nên tự chuyển từ Login sang Home. Nếu thất bại thì State chứa lỗi và trang hiện banner đỏ, giữ nguyên chữ bạn đã nhập.',
+      code: 'success: (s) => state.copyWith(status: AuthStatus.authenticated, ...)\n// app_router.dart: authenticated + đang ở /login  →  chuyển tới /' }
+  ];
+  var cur = 0;
+  var dotsEl = document.getElementById('dots');
+  var detailEl = document.getElementById('detail');
+
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function renderSteps() {
+    dotsEl.innerHTML = '';
+    STEPS.forEach(function (s, i) {
+      var b = document.createElement('button');
+      b.className = 'dot ' + s.lane + (i === cur ? ' on' : (i < cur ? ' done' : ''));
+      b.textContent = i + 1;
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', i === cur ? 'true' : 'false');
+      b.setAttribute('aria-label', 'Bước ' + (i + 1) + ': ' + s.title);
+      b.onclick = function () { cur = i; renderSteps(); };
+      dotsEl.appendChild(b);
+    });
+    var s = STEPS[cur];
+    document.querySelectorAll('.lane').forEach(function (l) { l.classList.toggle('on', l.dataset.lane === s.lane); });
+    detailEl.innerHTML =
+      '<div class="file"><span class="chip ' + s.lane + '">' + LAYER[s.lane] + '</span> ' + esc(s.file) + '</div>' +
+      '<h3>Bước ' + (cur + 1) + '/' + STEPS.length + ': ' + esc(s.title) + '</h3>' +
+      '<p>' + esc(s.text) + '</p>' +
+      '<pre>' + esc(s.code) + '</pre>';
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === STEPS.length - 1;
+  }
+  document.getElementById('prev').onclick = function () { if (cur > 0) { cur--; renderSteps(); } };
+  document.getElementById('next').onclick = function () { if (cur < STEPS.length - 1) { cur++; renderSteps(); } };
+  renderSteps();
+
+  /* ---------- 4. file explorer ---------- */
+  var FILES = [
+    ['lib/', 'core', 'main.dart', 'Cửa chính của app', 'Chạy đầu tiên. Gọi configureDependencies() để chuẩn bị mọi đồ dùng (DI), rồi runApp. Giống main() bạn đã quen, chỉ là có thêm bước chuẩn bị.'],
+    ['lib/', 'pres', 'app.dart', 'Widget gốc của app', 'Tạo AuthBloc và router, đưa Bloc cho toàn bộ app qua BlocProvider, gắn theme sáng và tối. Ngay khi dựng xong nó gửi AuthStarted để kiểm tra đã đăng nhập chưa.'],
+
+    ['lib/core/', 'core', 'result.dart', 'Kiểu kết quả: thành công hoặc lỗi', 'Thay vì ném exception khắp nơi, hàm trả về Result. Nó là Success(giá trị) hoặc Err(lỗi). Bạn dùng .when(success:, failure:) để xử lý cả hai trường hợp.'],
+    ['lib/core/error/', 'core', 'failures.dart', 'Các loại lỗi cho người dùng', 'Mỗi lỗi mang sẵn câu thông báo hiển thị, ví dụ UnauthorizedFailure là "Email or password is incorrect…". Giao diện chỉ việc đọc message.'],
+    ['lib/core/error/', 'core', 'exceptions.dart', 'Các exception ở tầng Data', 'ServerException, NetworkException, CacheException. Chỉ tầng Data ném ra, repository bắt rồi đổi thành Failure.'],
+    ['lib/core/usecase/', 'core', 'usecase.dart', 'Khuôn chung cho mọi usecase', 'Một usecase là một lớp có hàm call(params). NoParams dùng cho hành động không cần tham số, như logout.'],
+    ['lib/core/config/', 'core', 'app_config.dart', 'Địa chỉ backend', 'Chứa apiBaseUrl. Mặc định http://10.0.2.2:8080 cho Android emulator, đổi được bằng --dart-define=API_BASE_URL=...'],
+    ['lib/core/utils/', 'core', 'validators.dart', 'Các hàm kiểm tra form', 'Kiểm tra email hợp lệ, mật khẩu đủ 8 ký tự có số, xác nhận mật khẩu khớp. Trả về câu lỗi hoặc null nếu ổn, đúng kiểu validator của TextFormField.'],
+    ['lib/core/network/', 'core', 'api_client.dart', 'Bộ gọi API dùng chung', 'Bọc thư viện Dio: đặt địa chỉ gốc, timeout, và tự gắn "Authorization: Bearer <token>" vào mọi request, trừ các đường /auth/ vì đó là đường công khai.'],
+    ['lib/core/router/', 'core', 'routes.dart', 'Tên các đường dẫn màn hình', '/splash, /login, /sign-up, /. Gom vào một chỗ để không gõ sai chuỗi.'],
+    ['lib/core/router/', 'core', 'app_router.dart', 'Người điều hướng', 'Dùng go_router. Hàm redirect nhìn vào trạng thái đăng nhập: chưa biết thì ở splash, chưa đăng nhập thì ép về login, đã đăng nhập thì vào Home. Vì vậy các trang không phải tự chuyển màn hình.'],
+    ['lib/core/di/', 'core', 'injection.dart', 'Nơi lắp ráp các mảnh', 'DI (dependency injection) nghĩa là một chỗ duy nhất quyết định "AuthRepository thật là AuthRepositoryImpl". Dùng get_it để các nơi khác chỉ cần xin sl<AuthBloc>().'],
+    ['lib/core/theme/', 'core', 'app_colors.dart', 'Bảng màu của thiết kế', 'Hai bộ màu sáng và tối, giá trị lấy từ DESIGN.md (vàng gold, nền kem, nền tối).'],
+    ['lib/core/theme/', 'core', 'app_theme.dart', 'Theme của cả app', 'Gộp màu, font (Space Grotesk, Inter), kiểu ô nhập và nút thành một ThemeData. Nhờ vậy từng màn hình không phải tự tô màu.'],
+    ['lib/core/widgets/', 'core', 'brand_logo.dart', 'Logo BlockBet', 'Vẽ logo hai khối chồng nhau bằng CustomPainter, nên không cần file ảnh và đổi màu theo theme.'],
+
+    ['features/auth/domain/entities/', 'dom', 'auth_session.dart', 'Phiên đăng nhập', 'Một object nhỏ gồm token và email. Đây là thứ "có đăng nhập" nghĩa là gì trong app.'],
+    ['features/auth/domain/repositories/', 'dom', 'auth_repository.dart', 'Hợp đồng: các việc auth cần làm', 'Interface (abstract class) khai báo login, signUp, getSession, logout. Chưa có code thực hiện.'],
+    ['features/auth/domain/usecases/', 'dom', 'login.dart', 'Usecase đăng nhập', 'Nhận email và mật khẩu, nhờ repository đăng nhập.'],
+    ['features/auth/domain/usecases/', 'dom', 'sign_up.dart', 'Usecase đăng ký', 'Nhận email và mật khẩu, nhờ repository tạo tài khoản.'],
+    ['features/auth/domain/usecases/', 'dom', 'get_session.dart', 'Usecase kiểm tra đã đăng nhập chưa', 'Hỏi xem trong máy còn token không. Dùng lúc mở app.'],
+    ['features/auth/domain/usecases/', 'dom', 'logout.dart', 'Usecase đăng xuất', 'Xoá token đã lưu.'],
+
+    ['features/auth/data/models/', 'data', 'auth_session_model.dart', 'AuthSession kèm cách đọc dữ liệu', 'Biết tạo AuthSession từ JSON của server. Nó còn đọc claim "email" bên trong JWT để Home hiện được email.'],
+    ['features/auth/data/datasources/', 'data', 'auth_remote_data_source.dart', 'Nói chuyện với server', 'Gọi POST /auth/login và /auth/sign-up. Đổi lỗi mạng thành NetworkException, đổi mã lỗi HTTP thành ServerException kèm message của backend.'],
+    ['features/auth/data/datasources/', 'data', 'auth_local_data_source.dart', 'Két lưu token trong máy', 'Đọc, ghi, xoá token bằng flutter_secure_storage (an toàn hơn SharedPreferences cho dữ liệu nhạy cảm).'],
+    ['features/auth/data/repositories/', 'data', 'auth_repository_impl.dart', 'Thực hiện hợp đồng', 'Điều phối remote và local: login xong thì lưu token. Bắt mọi exception và đổi 401 thành "sai mật khẩu", 409 thành "email đã tồn tại", 5xx thành "không kết nối được server".'],
+
+    ['features/auth/presentation/bloc/', 'pres', 'auth_bloc.dart', 'Bộ não của luồng đăng nhập', 'Nhận Event, gọi usecase, phát State. Có thêm hai việc: chờ ít nhất 1 giây cho màn splash, và sau khi đăng ký thành công thì tự đăng nhập luôn (vì API đăng ký không trả token).'],
+    ['features/auth/presentation/bloc/', 'pres', 'auth_event.dart', 'Danh sách việc có thể xảy ra', 'AuthStarted, LoginSubmitted, SignUpSubmitted, LogoutRequested, AuthErrorDismissed. Là "lời nhắn" từ giao diện gửi cho Bloc.'],
+    ['features/auth/presentation/bloc/', 'pres', 'auth_state.dart', 'Ảnh chụp trạng thái', 'status (chưa biết, đã đăng nhập, chưa đăng nhập), email, isSubmitting, và tiêu đề cùng nội dung lỗi để hiện banner.'],
+    ['features/auth/presentation/pages/', 'pres', 'login_page.dart', 'Màn hình đăng nhập', 'Dựng form email, mật khẩu, nút Log in, banner lỗi. Kiểm tra form rồi gửi LoginSubmitted. Không có dòng nào gọi server.'],
+    ['features/auth/presentation/pages/', 'pres', 'sign_up_page.dart', 'Màn hình đăng ký', 'Giống màn đăng nhập, thêm ô xác nhận mật khẩu. Hai ô mật khẩu cùng bật hoặc tắt hiển thị.'],
+    ['features/auth/presentation/widgets/', 'pres', 'auth_form_widgets.dart', 'Linh kiện dùng chung cho form', 'Ô nhập có nhãn phía trên, ô mật khẩu có nút con mắt, banner lỗi, nút chính có trạng thái tải, dòng chân trang "New to BlockBet? Create account".'],
+
+    ['features/home/presentation/pages/', 'pres', 'home_page.dart', 'Màn hình chính (tạm)', 'Hiện email đang đăng nhập, hai thẻ "Markets" và "My bets" để chỗ cho tính năng sau, nút Log out.'],
+    ['features/splash/presentation/pages/', 'pres', 'splash_page.dart', 'Màn hình chờ khi mở app', 'Logo và chữ BlockBet trong lúc app kiểm tra token. Khác với splash native của Android hiện trước đó.']
+  ];
+
+  var filter = 'all';
+  var filtersEl = document.getElementById('filters');
+  var filesEl = document.getElementById('files');
+  var openKey = null;
+
+  function renderFilters() {
+    filtersEl.innerHTML = '';
+    [['all', 'Tất cả (' + FILES.length + ')'], ['pres', 'Presentation'], ['dom', 'Domain'], ['data', 'Data'], ['core', 'Core']].forEach(function (f) {
+      var b = document.createElement('button');
+      b.className = 'filter';
+      b.textContent = f[1];
+      b.setAttribute('aria-pressed', filter === f[0] ? 'true' : 'false');
+      b.onclick = function () { filter = f[0]; renderFilters(); renderFiles(); };
+      filtersEl.appendChild(b);
+    });
+  }
+
+  function renderFiles() {
+    filesEl.innerHTML = '';
+    var groups = [];
+    FILES.forEach(function (f) {
+      if (filter !== 'all' && f[1] !== filter) return;
+      var g = groups.length && groups[groups.length - 1].dir === f[0] ? groups[groups.length - 1] : null;
+      if (!g) { g = { dir: f[0], items: [] }; groups.push(g); }
+      g.items.push(f);
+    });
+    groups.forEach(function (g) {
+      var block = document.createElement('div');
+      block.className = 'folder-block';
+      var h = document.createElement('div');
+      h.className = 'folder-name';
+      h.textContent = g.dir;
+      block.appendChild(h);
+      g.items.forEach(function (f) {
+        var key = f[0] + f[2];
+        var open = openKey === key;
+        var row = document.createElement('div');
+        row.className = 'frow ' + f[1];
+        row.dataset.open = open ? 'true' : 'false';
+        var btn = document.createElement('button');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.innerHTML = '<span class="chip ' + f[1] + '">' + LAYER[f[1]] + '</span><span class="name">' + esc(f[2]) + '</span><span class="one">' + esc(f[3]) + '</span>';
+        btn.onclick = function () { openKey = open ? null : key; renderFiles(); };
+        row.appendChild(btn);
+        if (open) {
+          var more = document.createElement('div');
+          more.className = 'more';
+          more.innerHTML = '<p>' + esc(f[4]) + '</p>';
+          row.appendChild(more);
+        }
+        block.appendChild(row);
+      });
+      filesEl.appendChild(block);
+    });
+  }
+  renderFilters();
+  renderFiles();
+
+  /* ---------- 5. copy buttons ---------- */
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.onclick = function () {
+      var el = document.getElementById(btn.dataset.for);
+      var done = function () { btn.textContent = 'Đã chép'; setTimeout(function () { btn.textContent = 'Sao chép'; }, 1500); };
+      try {
+        navigator.clipboard.writeText(el.textContent).then(done, function () { selectText(el); });
+      } catch (e) { selectText(el); }
+    };
+  });
+  function selectText(el) {
+    var r = document.createRange(); r.selectNodeContents(el);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+</script>

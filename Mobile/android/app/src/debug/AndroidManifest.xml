@@ -4,4 +4,6 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Debug only: the local backend is plain http://, which Android 9+ blocks by default. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>
