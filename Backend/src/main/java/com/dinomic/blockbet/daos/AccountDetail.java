@@ -1,6 +1,9 @@
 package com.dinomic.blockbet.daos;
 
+import com.dinomic.blockbet.enums.Gender;
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "ACCOUNT_DETAILS")
@@ -11,14 +14,21 @@ public class AccountDetail {
     @Id
     private Long accountDetailId;
 
-    @Column(name = "PHONE", length = 16, nullable = false)
+    @Column(name = "PHONE", length = 16)
     private String phone;
 
-    @Column(name = "ADDRESS", nullable = false)
+    @Column(name = "ADDRESS")
     private String address;
 
-    @Column(name = "NATIONALITY", length = 2, nullable = false)
+    @Column(name = "NATIONALITY", length = 2)
     private String nationality;
+
+    @Column(name = "DATE_OF_BIRTH")
+    private LocalDate dateOfBirth;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "GENDER", length = 16)
+    private Gender gender;
 
     @OneToOne(mappedBy = "accountDetail")
     private Account account;
@@ -49,6 +59,22 @@ public class AccountDetail {
 
     public void setNationality(String nationality) {
         this.nationality = nationality;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
     public Account getAccount() {

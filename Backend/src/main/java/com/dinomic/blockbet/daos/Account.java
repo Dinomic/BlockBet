@@ -23,6 +23,12 @@ public class Account {
     @Column(name = "EMAIL", nullable = false)
     private String email;
 
+    @Column(name = "DISPLAY_NAME", length = 64)
+    private String displayName;
+
+    @Column(name = "AVATAR_URL", length = 512)
+    private String avatarUrl;
+
     @Column(name = "ENABLED", nullable = false)
     private Boolean isEnabled = true;
 
@@ -59,6 +65,22 @@ public class Account {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public Boolean getEnabled() {

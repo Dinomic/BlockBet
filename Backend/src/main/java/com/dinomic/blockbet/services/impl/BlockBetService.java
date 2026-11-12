@@ -3,6 +3,8 @@ package com.dinomic.blockbet.services.impl;
 import blockbet.openapi.model.*;
 import com.dinomic.blockbet.daos.Account;
 import com.dinomic.blockbet.daos.Wallet;
+import com.dinomic.blockbet.mappers.GeneralMapper;
+import com.dinomic.blockbet.services.IAccountService;
 import com.dinomic.blockbet.exceptions.BlockBetError;
 import com.dinomic.blockbet.exceptions.BlockBetException;
 import com.dinomic.blockbet.repositories.IBBTransactionReceiptRepo;
@@ -23,13 +25,36 @@ import java.util.stream.Collectors;
 public class BlockBetService implements IBlockBetService {
 
     @Autowired
+    IAccountService accountService;
+
+    @Autowired
     IBlockchainService blockchainService;
 
     @Autowired
     IWalletRepo walletRepo;
 
-    @Autowired
-    IBBTransactionReceiptRepo bbTransactionReceiptRepo;
+    @Override
+    @Transactional(readOnly = true)
+    public InfosGetResponse handleInfosGetRequest(Account account) {
+        return GeneralMapper.INSTANCE.accountToInfosGetResponse(
+            accountService.getAccountByAccountId(account.getAccountId()));
+    }
+
+    @Override
+    @Transactional
+    public InfosGetResponse handleInfosPutRequest(Account account, InfosPutRequest request) {
+        Account updated = accountService.updateAccountInfo(
+            account.getAccountId(),
+            request.getDisplayName(),
+            request.getAvatarUrl(),
+            request.getPhone(),
+            request.getAddress(),
+            request.getNationality(),
+            request.getDateOfBirth(),
+            GeneralMapper.INSTANCE.toGender(request.getGender()));
+
+        return GeneralMapper.INSTANCE.accountToInfosGetResponse(updated);
+    }
 
     /**
      * Wallet creation and its faucet funding form one unit of work: if funding fails the

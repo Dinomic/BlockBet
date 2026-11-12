@@ -18,7 +18,7 @@ spring:
     baseline-on-migrate: true
 security:
   jwt:
-    expirationTime: 1 #mins
+    expirationTime: 15 #mins
     secretKey: "superSecretKeyNoOneCanGuess"
 blockchain:
   network:

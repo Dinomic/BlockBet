@@ -17,6 +17,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InfosGetResponse'
+    put:
+      summary: update account infos (only provided fields are updated)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InfosPutRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfosGetResponse'
 
   /blockbet/wallet:
     post:
@@ -93,6 +107,53 @@ components:
           type: string
         name:
           type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        nationality:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          $ref: '#/components/schemas/Gender'
+
+    InfosPutRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          maxLength: 64
+        avatarUrl:
+          type: string
+          maxLength: 512
+        phone:
+          type: string
+          maxLength: 16
+        address:
+          type: string
+          maxLength: 256
+        nationality:
+          type: string
+          minLength: 2
+          maxLength: 2
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          $ref: '#/components/schemas/Gender'
+
+    Gender:
+      type: string
+      enum:
+        - MALE
+        - FEMALE
+        - OTHER
 
     ReceiptsGetResponse:
       type: object

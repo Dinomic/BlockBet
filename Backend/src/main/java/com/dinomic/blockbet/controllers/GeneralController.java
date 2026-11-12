@@ -19,9 +19,6 @@ import java.math.BigInteger;
 public class GeneralController implements BlockbetApi {
 
     @Autowired
-    IAccountService accountService;
-
-    @Autowired
     BlockBetUtil blockBetUtil;
 
     @Autowired
@@ -29,9 +26,14 @@ public class GeneralController implements BlockbetApi {
 
     @Override
     public ResponseEntity<InfosGetResponse> blockbetInfosGet() {
-        //TODO refine account info response
         Account account = blockBetUtil.getAccountFromRequest();
-        return ResponseEntity.ok(GeneralMapper.INSTANCE.accountToInfosGetResponse(account));
+        return ResponseEntity.ok(blockBetService.handleInfosGetRequest(account));
+    }
+
+    @Override
+    public ResponseEntity<InfosGetResponse> blockbetInfosPut(InfosPutRequest infosPutRequest) {
+        Account account = blockBetUtil.getAccountFromRequest();
+        return ResponseEntity.ok(blockBetService.handleInfosPutRequest(account, infosPutRequest));
     }
 
     @Override
