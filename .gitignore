@@ -6,6 +6,9 @@ Blockchain/secrets/*
 
 Bruno/*
 
+# Wallet keystore files generated at runtime by the Backend (web3j WalletUtils)
+Backend/src/main/java/com/dinomic/blockbet/wallet_files/
+
 
 ### IntelliJ IDEA ###
 .idea

@@ -1,76 +1,49 @@
 package com.dinomic.blockbet.exceptions;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.OffsetDateTime;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+/**
+ * JSON body returned for every error. It is built from the {@link HttpServletRequest} passed in
+ * explicitly (never from thread-local request state), so it is safe to use from filters,
+ * entry points and advices alike.
+ */
 public class BlockBetErrorRestResponse {
-    private static final Logger logger = LoggerFactory.getLogger(BlockBetErrorRestResponse.class);
 
-    private OffsetDateTime dateTime = OffsetDateTime.now();
+    private final OffsetDateTime dateTime = OffsetDateTime.now();
 
-    private String path;
+    private final String path;
 
-    private int errorCode;
+    private final int errorCode;
 
-    private String error;
+    private final String error;
 
-    private String message;
+    private final String message;
 
-    private String sessionId;
+    private final String sessionId;
 
-    public BlockBetErrorRestResponse(Throwable exception) {
-        this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
-        logger.error("Session {} Unhandled exception occurred", this.sessionId, exception);
-
-        this.errorCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-        this.error = HttpStatus.INTERNAL_SERVER_ERROR.name();
-        this.message = HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase();
-
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (requestAttributes != null) {
-            this.path  = requestAttributes.getRequest().getRequestURI();
-        } else {
-            this.path = RequestContextHolder.currentRequestAttributes().getSessionId();
-        }
-
+    public BlockBetErrorRestResponse(String path, String sessionId, int errorCode, String error, String message) {
+        this.path = path;
+        this.sessionId = sessionId;
+        this.errorCode = errorCode;
+        this.error = error;
+        this.message = message;
     }
 
-    public BlockBetErrorRestResponse(String message,  BlockBetError error) {
-        this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
-        logger.error("Session {} exception occurred - error {} message: {}", this.sessionId, error, message);
-
-        this.errorCode = error.getCode();
-        this.error = error.name();
-        this.message = message;
-
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (requestAttributes != null) {
-            this.path  = requestAttributes.getRequest().getRequestURI();
-        } else {
-            this.path = RequestContextHolder.currentRequestAttributes().getSessionId();
-        }
+    public static BlockBetErrorRestResponse of(HttpServletRequest request, HttpStatus status, String message) {
+        return new BlockBetErrorRestResponse(
+            request.getRequestURI(), sessionIdOf(request), status.value(), status.name(), message);
     }
 
-    public BlockBetErrorRestResponse(String message,  HttpStatus httpStatus) {
-        this.sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
-        logger.error("Session {} exception occurred - error {} message: {}", this.sessionId, error, message);
+    public static BlockBetErrorRestResponse of(HttpServletRequest request, BlockBetError error, String message) {
+        return new BlockBetErrorRestResponse(
+            request.getRequestURI(), sessionIdOf(request), error.getCode(), error.name(), message);
+    }
 
-        this.errorCode = httpStatus.value();
-        this.error = httpStatus.name();
-        this.message = message;
-
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (requestAttributes != null) {
-            this.path  = requestAttributes.getRequest().getRequestURI();
-        } else {
-            this.path = RequestContextHolder.currentRequestAttributes().getSessionId();
-        }
+    private static String sessionIdOf(HttpServletRequest request) {
+        return request.getSession().getId();
     }
 
     public OffsetDateTime getDateTime() {

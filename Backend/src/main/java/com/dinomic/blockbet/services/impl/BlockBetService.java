@@ -11,6 +11,7 @@ import com.dinomic.blockbet.services.IBlockBetService;
 import com.dinomic.blockbet.services.IBlockchainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -30,7 +31,12 @@ public class BlockBetService implements IBlockBetService {
     @Autowired
     IBBTransactionReceiptRepo bbTransactionReceiptRepo;
 
+    /**
+     * Wallet creation and its faucet funding form one unit of work: if funding fails the
+     * wallet row is rolled back, so no unfunded wallet is left behind.
+     */
     @Override
+    @Transactional
     public WalletPostResponse handleWalletPostRequest(Account account, WalletPostRequest request){
         WalletPostResponse response = new WalletPostResponse();
 
@@ -38,6 +44,8 @@ public class BlockBetService implements IBlockBetService {
 
         try {
             newWallet = blockchainService.createWallet(account, request.getPassword());
+        } catch (BlockBetException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -52,6 +60,7 @@ public class BlockBetService implements IBlockBetService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public WalletsGetResponse handleWalletsGetRequest(Account account) {
         WalletsGetResponse response = new WalletsGetResponse();
 
@@ -75,6 +84,7 @@ public class BlockBetService implements IBlockBetService {
     }
 
     @Override
+    @Transactional
     public TransferTokensPutResponse handleTransferTokensPutRequest(Account account, TransferTokensPutRequest request) {
         TransferTokensPutResponse response = new TransferTokensPutResponse();
 

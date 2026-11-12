@@ -21,7 +21,8 @@ public class BlockBetAuthenticationEntryPoint implements AuthenticationEntryPoin
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException {
 
-        BlockBetErrorRestResponse re = new BlockBetErrorRestResponse( "Authentication failed", HttpStatus.UNAUTHORIZED);
+        BlockBetErrorRestResponse re = BlockBetErrorRestResponse.of(
+                request, HttpStatus.UNAUTHORIZED, "Authentication failed");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         OutputStream responseStream = response.getOutputStream();

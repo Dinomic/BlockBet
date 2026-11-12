@@ -16,19 +16,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.Hash;
 import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +58,7 @@ public class BlockchainService implements IBlockchainService {
     IBBTransactionReceiptRepo transactionReceiptRepo;
 
     @Override
+    @Transactional
     public Wallet createWallet(Account account, String password) throws Exception {
 
         Wallet result = new Wallet();
@@ -85,17 +89,27 @@ public class BlockchainService implements IBlockchainService {
     }
 
     @Override
+    @Transactional
     public void transferEthFromFaucet(String toAddress, Integer etherAmount) {
+        TransactionReceipt transactionReceipt;
         try {
             Credentials faucetCredentials = Credentials.create(blockchainProperties.mainAccount().privateKey());
             TransactionManager txManager = new RawTransactionManager(web3j, faucetCredentials, blockchainProperties.network().chainId());
             Transfer transfer = new Transfer(web3j, txManager);
-            TransactionReceipt transactionReceipt = transfer.sendFunds(
+            transactionReceipt = transfer.sendFunds(
                 toAddress, BigDecimal.valueOf(etherAmount), Convert.Unit.ETHER).send();
-
-            transactionReceiptRepo.save(transactionReceiptConvert(transactionReceipt, TransactionType.FUNDING, Boolean.TRUE));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Faucet transfer to {} failed", toAddress, e);
+            throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR, "Error funding wallet from faucet");
+        }
+
+        try {
+            transactionReceiptRepo.save(transactionReceiptConvert(transactionReceipt, TransactionType.FUNDING, Boolean.TRUE));
+        } catch (RuntimeException e) {
+            // Funds are already on chain; keep the hash in the log so the record can be rebuilt manually.
+            log.error("Faucet tx {} to {} succeeded on chain but its receipt could not be saved",
+                transactionReceipt.getTransactionHash(), toAddress, e);
+            throw e;
         }
     }
 
@@ -139,34 +153,48 @@ public class BlockchainService implements IBlockchainService {
         }
     }
 
+    /**
+     * The transaction is signed locally first so its hash is known up front. The receipt row is
+     * written (and flushed) <b>before</b> the transaction is broadcast: if the DB write fails nothing
+     * has been sent, and if the broadcast fails the surrounding DB transaction rolls the row back.
+     * That way a transfer can never exist on chain without a matching record.
+     */
     @Override
+    @Transactional
     public String transferEth(Wallet from, String toAddress, BigInteger weiAmount) {
-
         try {
-            EthGetTransactionCount ethGetTransactionCount = web3j.ethGetTransactionCount(
-                from.getAddress(), DefaultBlockParameterName.PENDING).sendAsync().get();
-            BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+            BigInteger nonce = web3j.ethGetTransactionCount(
+                from.getAddress(), DefaultBlockParameterName.PENDING).send().getTransactionCount();
             BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
 
-            RawTransaction rawTransaction  = RawTransaction.createEtherTransaction(
+            RawTransaction rawTransaction = RawTransaction.createEtherTransaction(
                 nonce, gasPrice, Transfer.GAS_LIMIT, toAddress, weiAmount);
 
             Credentials credentials = Credentials.create(from.getPrivateKey());
-            RawTransactionManager rawTransactionManager = new RawTransactionManager(web3j, credentials, blockchainProperties.network().chainId());
+            byte[] signedMessage = TransactionEncoder.signMessage(
+                rawTransaction, blockchainProperties.network().chainId(), credentials);
+            String signedHex = Numeric.toHexString(signedMessage);
+            String txHash = Hash.sha3(signedHex);
 
-            EthSendTransaction ethSendTransaction = rawTransactionManager.signAndSend(rawTransaction);
-            String txHash = ethSendTransaction.getTransactionHash();
+            BBTransactionReceipt pendingReceipt = new BBTransactionReceipt();
+            pendingReceipt.setHash(txHash);
+            pendingReceipt.setFromAddress(from.getAddress());
+            pendingReceipt.setToAddress(toAddress);
+            pendingReceipt.setTransactionType(TransactionType.TOKEN_TRANSFER);
+            transactionReceiptRepo.saveAndFlush(pendingReceipt);
 
-            BBTransactionReceipt decoyReceipt = new BBTransactionReceipt();
-            decoyReceipt.setHash(txHash);
-            decoyReceipt.setFromAddress(from.getAddress());
-            decoyReceipt.setToAddress(toAddress);
-            decoyReceipt.setTransactionType(TransactionType.TOKEN_TRANSFER);
-            transactionReceiptRepo.save(decoyReceipt);
+            EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(signedHex).send();
+            if (ethSendTransaction.hasError()) {
+                throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR,
+                    "Transfer rejected by network: " + ethSendTransaction.getError().getMessage());
+            }
 
             return txHash;
+        } catch (BlockBetException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Error transferring ETH from {} to {}", from.getAddress(), toAddress, e);
+            throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR, "Error transferring tokens");
         }
     }
 }

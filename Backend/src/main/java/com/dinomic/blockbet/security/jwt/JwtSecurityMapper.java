@@ -33,17 +33,18 @@ public class JwtSecurityMapper {
 
     private List<String> extractRoles (Claim rolesClaim) {
         if (rolesClaim.isNull()) {
-            new ArrayList<>();
+            return new ArrayList<>();
         }
 
-        return  rolesClaim.asList(String.class);
+        List<String> roles = rolesClaim.asList(String.class);
+        return roles == null ? new ArrayList<>() : roles;
     }
 
 
     public String issueJwtToken(BlockBetAuthenticationToken token) {
 
         return JWT.create()
-                .withExpiresAt(Date.from(Instant.now().plus(Duration.ofMinutes(15))))
+                .withExpiresAt(Date.from(Instant.now().plus(Duration.ofMinutes(properties.expirationTime()))))
                 .withSubject(String.valueOf(token.getUserDetail().getAccountId()))
                 .withClaim("email", token.getUserDetail().getEmail())
                 .withClaim("roles", token.getUserDetail().getRoles())
