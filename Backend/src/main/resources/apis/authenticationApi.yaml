@@ -9,7 +9,7 @@ servers:
 paths:
   /auth/login:
     post:
-      summary: retrieve jwt tokens
+      summary: log in and retrieve an access token and a refresh token
       requestBody:
         content:
           application/json:
@@ -21,7 +21,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthLoginPostResponse'
+                $ref: '#/components/schemas/AuthTokenResponse'
+  /auth/refresh:
+    post:
+      summary: exchange a refresh token for a new access token and a new refresh token (rotation)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRefreshPostRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+        '401':
+          description: refresh token is unknown, expired, revoked or already used
+  /auth/logout:
+    post:
+      summary: revoke the refresh token (and its whole rotation chain). Idempotent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLogoutPostRequest'
+      responses:
+        '204':
+          description: refresh token revoked (or it was already unknown)
   /auth/sign-up:
     post:
       summary: sign up an account
@@ -42,10 +72,35 @@ components:
           type: string
         password:
           type: string
-    AuthLoginPostResponse:
+    AuthTokenResponse:
       type: object
       properties:
-        token:
+        accessToken:
+          type: string
+          description: short-lived JWT, sent as "Authorization Bearer" on API calls
+        refreshToken:
+          type: string
+          description: opaque long-lived token, only used against /auth/refresh and /auth/logout
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          format: int64
+          description: access token lifetime in seconds
+    AuthRefreshPostRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+    AuthLogoutPostRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
           type: string
     AuthSignUpRequest:
       type: object

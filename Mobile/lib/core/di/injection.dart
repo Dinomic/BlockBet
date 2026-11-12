@@ -21,7 +21,14 @@ Future<void> configureDependencies() async {
   // Auth - data
   sl.registerLazySingleton<AuthLocalDataSource>(() => AuthLocalDataSourceImpl(sl()));
   sl.registerLazySingleton<ApiClient>(
-    () => ApiClient(tokenProvider: () => sl<AuthLocalDataSource>().readToken()),
+    () => ApiClient(
+      tokenProvider: () => sl<AuthLocalDataSource>().readToken(),
+      refreshTokenProvider: () => sl<AuthLocalDataSource>().readRefreshToken(),
+      onTokensRefreshed: (access, refresh) =>
+          sl<AuthLocalDataSource>().saveTokens(accessToken: access, refreshToken: refresh),
+      // Refresh token rejected by the server: drop the session and go back to login.
+      onSessionExpired: () async => sl<AuthBloc>().add(const LogoutRequested()),
+    ),
   );
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<AuthRepository>(

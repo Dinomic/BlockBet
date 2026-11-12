@@ -16,7 +16,10 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<AuthSession>> login({required String email, required String password}) {
     return _run(() async {
       final session = await remote.login(email: email, password: password);
-      await local.saveToken(session.token);
+      await local.saveTokens(
+        accessToken: session.token,
+        refreshToken: session.refreshToken ?? '',
+      );
       return session;
     });
   }
@@ -35,7 +38,24 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Result<void>> logout() => _run(local.clearToken);
+  Future<Result<void>> logout() {
+    return _run(() async {
+      // Best effort: revoke on the server, but always clear local tokens so the user
+      // is logged out even when offline or the token is already invalid.
+      final refreshToken = await local.readRefreshToken();
+      try {
+        if (refreshToken != null && refreshToken.isNotEmpty) {
+          await remote.logout(refreshToken: refreshToken);
+        }
+      } on ServerException catch (_) {
+        // Server rejected / unreachable: nothing more to do, fall through.
+      } on NetworkException catch (_) {
+        // Offline: the refresh token will expire server-side on its own.
+      } finally {
+        await local.clearToken();
+      }
+    });
+  }
 
   Future<Result<T>> _run<T>(Future<T> Function() action) async {
     try {

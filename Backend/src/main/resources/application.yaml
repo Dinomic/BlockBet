@@ -18,7 +18,9 @@ spring:
     baseline-on-migrate: true
 security:
   jwt:
-    expirationTime: 15 #mins
+    expirationTime: 15 #mins, access token
+    refreshExpirationDays: 7 #days, refresh token
+    issuer: "blockbet"
     secretKey: "superSecretKeyNoOneCanGuess"
 blockchain:
   network:

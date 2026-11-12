@@ -7,6 +7,9 @@ import '../models/auth_session_model.dart';
 abstract class AuthRemoteDataSource {
   Future<AuthSessionModel> login({required String email, required String password});
   Future<void> signUp({required String email, required String password});
+
+  /// Revokes the refresh token on the server (ends the session there).
+  Future<void> logout({required String refreshToken});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -22,6 +25,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> signUp({required String email, required String password}) async {
     await _post('/auth/sign-up', {'email': email, 'password': password});
+  }
+
+  @override
+  Future<void> logout({required String refreshToken}) async {
+    await _post('/auth/logout', {'refreshToken': refreshToken});
   }
 
   Future<dynamic> _post(String path, Map<String, dynamic> body) async {

@@ -2,6 +2,7 @@ package com.dinomic.blockbet.exceptions;
 
 public enum BlockBetError {
     UNAUTHORIZED(401),
+    INVALID_REFRESH_TOKEN(401),
     BLOCKCHAIN_ERROR(500),
     INPUT_PRIVATE_KEY_NOT_MATCH(400),
     WALLET_NOT_FOUND(404),

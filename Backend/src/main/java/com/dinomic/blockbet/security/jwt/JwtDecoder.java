@@ -14,7 +14,9 @@ public class JwtDecoder {
 
     public JwtDecoder(JwtProperties properties) {
         // The verifier is thread-safe and reusable, so build it only once.
-        this.verifier = JWT.require(Algorithm.HMAC256(properties.secretKey())).build();
+        this.verifier = JWT.require(Algorithm.HMAC256(properties.secretKey()))
+                .withIssuer(properties.issuer())
+                .build();
     }
 
     /**

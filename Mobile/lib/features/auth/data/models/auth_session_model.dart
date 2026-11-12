@@ -3,10 +3,13 @@ import 'dart:convert';
 import '../../domain/entities/auth_session.dart';
 
 class AuthSessionModel extends AuthSession {
-  const AuthSessionModel({required super.token, super.email});
+  const AuthSessionModel({required super.token, super.email, super.refreshToken});
 
-  factory AuthSessionModel.fromJson(Map<String, dynamic> json) =>
-      AuthSessionModel.fromToken(json['token'] as String);
+  factory AuthSessionModel.fromJson(Map<String, dynamic> json) => AuthSessionModel(
+        token: json['accessToken'] as String,
+        email: _emailFromJwt(json['accessToken'] as String),
+        refreshToken: json['refreshToken'] as String?,
+      );
 
   /// The backend JWT carries an `email` claim; read it (without verifying) for display.
   factory AuthSessionModel.fromToken(String token) =>

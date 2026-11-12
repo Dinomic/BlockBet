@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class JwtSecurityMapper {
@@ -41,10 +42,20 @@ public class JwtSecurityMapper {
     }
 
 
+    /** Lifetime of an access token in seconds, as reported to clients ({@code expires_in}). */
+    public long accessTokenTtlSeconds() {
+        return Duration.ofMinutes(properties.expirationTime()).toSeconds();
+    }
+
+    /** Issues a short-lived access token. Long-lived sessions are carried by the refresh token. */
     public String issueJwtToken(BlockBetAuthenticationToken token) {
+        Instant now = Instant.now();
 
         return JWT.create()
-                .withExpiresAt(Date.from(Instant.now().plus(Duration.ofMinutes(properties.expirationTime()))))
+                .withIssuer(properties.issuer())
+                .withIssuedAt(Date.from(now))
+                .withExpiresAt(Date.from(now.plus(Duration.ofMinutes(properties.expirationTime()))))
+                .withJWTId(UUID.randomUUID().toString())
                 .withSubject(String.valueOf(token.getUserDetail().getAccountId()))
                 .withClaim("email", token.getUserDetail().getEmail())
                 .withClaim("roles", token.getUserDetail().getRoles())
