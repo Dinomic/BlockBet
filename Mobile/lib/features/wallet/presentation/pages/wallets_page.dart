@@ -19,8 +19,16 @@ class WalletsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Wallets')),
+      floatingActionButton: const _CreateWalletButton(),
       body: SafeArea(
-        child: BlocBuilder<WalletsBloc, WalletsState>(
+        child: BlocConsumer<WalletsBloc, WalletsState>(
+          listenWhen: (p, c) => p.createCount != c.createCount || p.createError != c.createError,
+          listener: (context, state) {
+            final text = state.createError ?? 'Wallet created.';
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(text)));
+          },
           builder: (context, state) {
             if (state.status == WalletsStatus.loading) return const _LoadingList();
             if (state.status == WalletsStatus.failure) {
@@ -51,8 +59,9 @@ class _WalletList extends StatelessWidget {
     final wallets = state.wallets;
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
+      // Bottom padding keeps the last tile clear of the floating button.
       padding: const EdgeInsets.fromLTRB(
-        AppTheme.screenPadding, 4, AppTheme.screenPadding, AppTheme.screenPadding,
+        AppTheme.screenPadding, 4, AppTheme.screenPadding, 96,
       ),
       itemCount: wallets.length + 1 + (state.errorMessage != null ? 1 : 0),
       separatorBuilder: (_, _) => const SizedBox(height: 12),
@@ -122,7 +131,7 @@ class TotalBalanceCard extends StatelessWidget {
             const SizedBox(height: 4),
             ExcludeSemantics(
               child: Text(
-                count == 1 ? '1 wallet' : '$count wallets',
+                '$count of ${Wallet.maxPerAccount} wallets',
                 style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
               ),
             ),
@@ -201,6 +210,132 @@ class WalletTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CreateWalletButton extends StatelessWidget {
+  const _CreateWalletButton();
+
+  Future<void> _onPressed(BuildContext context) async {
+    final bloc = context.read<WalletsBloc>();
+    final password = await showDialog<String>(
+      context: context,
+      builder: (_) => const _CreateWalletDialog(),
+    );
+    if (password != null) bloc.add(WalletCreated(password));
+  }
+
+  void _showLimitMessage(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text('You can have at most ${Wallet.maxPerAccount} wallets per account.'),
+      ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return BlocBuilder<WalletsBloc, WalletsState>(
+      buildWhen: (p, c) =>
+          p.status != c.status || p.isCreating != c.isCreating || p.wallets.length != c.wallets.length,
+      builder: (context, state) {
+        if (state.status != WalletsStatus.loaded) return const SizedBox.shrink();
+        final muted = state.isCreating || state.limitReached;
+        return Tooltip(
+          message: state.limitReached ? 'Wallet limit reached (${Wallet.maxPerAccount})' : '',
+          child: FloatingActionButton.extended(
+            // At the limit the button stays tappable so it can explain why nothing happens.
+            onPressed: state.isCreating
+                ? null
+                : state.limitReached
+                    ? () => _showLimitMessage(context)
+                    : () => _onPressed(context),
+            // Opaque (blended) so list content never shows through the button.
+            backgroundColor: muted
+                ? Color.alphaBlend(scheme.onSurface.withValues(alpha: 0.12), scheme.surface)
+                : scheme.primary,
+            foregroundColor: muted ? scheme.onSurfaceVariant : scheme.onPrimary,
+            elevation: muted ? 0 : 2,
+            icon: state.isCreating
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  )
+                : const Icon(Icons.add_rounded),
+            label: Text(
+              state.isCreating
+                  ? 'Creating…'
+                  : state.limitReached
+                      ? 'Limit reached'
+                      : 'New wallet',
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CreateWalletDialog extends StatefulWidget {
+  const _CreateWalletDialog();
+
+  @override
+  State<_CreateWalletDialog> createState() => _CreateWalletDialogState();
+}
+
+class _CreateWalletDialogState extends State<_CreateWalletDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _password = TextEditingController();
+  bool _obscure = true;
+
+  @override
+  void dispose() {
+    _password.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_formKey.currentState!.validate()) Navigator.of(context).pop(_password.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      title: const Text('New wallet'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Choose a password to protect this wallet. New wallets are funded automatically.',
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 16),
+            PasswordField(
+              controller: _password,
+              label: 'Wallet password',
+              obscure: _obscure,
+              onToggleObscure: () => setState(() => _obscure = !_obscure),
+              onSubmitted: _submit,
+              validator: (v) => (v == null || v.isEmpty) ? 'Enter a wallet password.' : null,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+        FilledButton(
+          style: FilledButton.styleFrom(minimumSize: const Size(96, 44)),
+          onPressed: _submit,
+          child: const Text('Create'),
+        ),
+      ],
     );
   }
 }

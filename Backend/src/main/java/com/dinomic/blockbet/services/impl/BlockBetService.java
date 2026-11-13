@@ -1,7 +1,9 @@
 package com.dinomic.blockbet.services.impl;
 
 import blockbet.openapi.model.*;
+import com.dinomic.blockbet.IBlockBetConstant;
 import com.dinomic.blockbet.daos.Account;
+import com.dinomic.blockbet.repositories.IAccountRepo;
 import com.dinomic.blockbet.daos.Wallet;
 import com.dinomic.blockbet.mappers.GeneralMapper;
 import com.dinomic.blockbet.services.IAccountService;
@@ -32,6 +34,9 @@ public class BlockBetService implements IBlockBetService {
 
     @Autowired
     IWalletRepo walletRepo;
+
+    @Autowired
+    IAccountRepo accountRepo;
 
     @Override
     @Transactional(readOnly = true)
@@ -65,10 +70,19 @@ public class BlockBetService implements IBlockBetService {
     public WalletPostResponse handleWalletPostRequest(Account account, WalletPostRequest request){
         WalletPostResponse response = new WalletPostResponse();
 
+        // Lock the account row first so concurrent requests cannot both pass the limit check.
+        Account lockedAccount = accountRepo.findByIdForUpdate(account.getAccountId()).orElseThrow(() ->
+            new BlockBetException(BlockBetError.UNAUTHORIZED, "Account not found"));
+
+        if (walletRepo.countByAccount(lockedAccount) >= IBlockBetConstant.MAX_WALLETS_PER_ACCOUNT) {
+            throw new BlockBetException(BlockBetError.WALLET_LIMIT_REACHED,
+                "You can have at most " + IBlockBetConstant.MAX_WALLETS_PER_ACCOUNT + " wallets per account");
+        }
+
         Wallet newWallet;
 
         try {
-            newWallet = blockchainService.createWallet(account, request.getPassword());
+            newWallet = blockchainService.createWallet(lockedAccount, request.getPassword());
         } catch (BlockBetException e) {
             throw e;
         } catch (Exception e) {

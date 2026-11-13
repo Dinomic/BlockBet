@@ -13,6 +13,9 @@ class Wallet extends Equatable {
   /// Balance in wei (1 token = 10^18 wei).
   final BigInt balanceWei;
 
+  /// Mirrors the backend rule (IBlockBetConstant.MAX_WALLETS_PER_ACCOUNT).
+  static const maxPerAccount = 10;
+
   static final _weiPerToken = BigInt.from(10).pow(18);
 
   /// Balance as a trimmed decimal string, e.g. `1.5`, `0`, `0.000001`.

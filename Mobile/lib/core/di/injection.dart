@@ -19,6 +19,7 @@ import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/wallet/data/datasources/wallet_remote_data_source.dart';
 import '../../features/wallet/data/repositories/wallet_repository_impl.dart';
 import '../../features/wallet/domain/repositories/wallet_repository.dart';
+import '../../features/wallet/domain/usecases/create_wallet.dart';
 import '../../features/wallet/domain/usecases/get_wallets.dart';
 import '../../features/wallet/presentation/bloc/wallets_bloc.dart';
 import '../network/api_client.dart';
@@ -64,7 +65,8 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton<WalletRemoteDataSource>(() => WalletRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<WalletRepository>(() => WalletRepositoryImpl(remote: sl()));
   sl.registerLazySingleton(() => GetWallets(sl()));
-  sl.registerFactory(() => WalletsBloc(getWallets: sl()));
+  sl.registerLazySingleton(() => CreateWallet(sl()));
+  sl.registerFactory(() => WalletsBloc(getWallets: sl(), createWallet: sl()));
 
   // Auth - presentation (singleton: it owns the app-wide session state)
   sl.registerLazySingleton(

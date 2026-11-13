@@ -16,6 +16,13 @@ class WalletModel {
     return [for (final e in items) fromJson(Map<String, dynamic>.from(e as Map))];
   }
 
+  /// Parses `WalletPostResponse`; `privateKey` is deliberately ignored. Balance is unknown yet.
+  static Wallet createdFromJson(Map<String, dynamic> json) => Wallet(
+        address: json['address'] as String,
+        publicKey: (json['publicKey'] as String?) ?? '',
+        balanceWei: BigInt.zero,
+      );
+
   /// The API sends wei as a JSON number (can exceed 2^53) — accept num or string.
   static BigInt _parseWei(Object? v) {
     if (v is int) return BigInt.from(v);

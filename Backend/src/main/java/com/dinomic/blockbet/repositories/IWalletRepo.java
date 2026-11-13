@@ -12,5 +12,7 @@ import java.util.Optional;
 public interface IWalletRepo extends JpaRepository<Wallet, Long> {
     List<Wallet> findAllByAccount(Account account);
 
+    long countByAccount(Account account);
+
     Optional<Wallet> findByAccountAndAddress(Account account, String address);
 }
