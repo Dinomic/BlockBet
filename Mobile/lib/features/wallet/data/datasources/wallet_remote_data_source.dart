@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -8,6 +10,12 @@ import '../models/wallet_model.dart';
 abstract class WalletRemoteDataSource {
   Future<List<Wallet>> getWallets();
   Future<Wallet> createWallet(String password);
+  Future<String> transferTokens({
+    required String fromAddress,
+    required String toAddress,
+    required BigInt amountWei,
+    required String idempotencyKey,
+  });
 }
 
 class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
@@ -17,6 +25,7 @@ class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
   static const createTimeout = Duration(seconds: 90);
   static const _listPath = '/blockbet/wallets';
   static const _createPath = '/blockbet/wallet';
+  static const _transferPath = '/blockbet/transfer-tokens';
 
   @override
   Future<List<Wallet>> getWallets() async {
@@ -36,6 +45,24 @@ class WalletRemoteDataSourceImpl implements WalletRemoteDataSource {
       ),
     );
     return WalletModel.createdFromJson(Map<String, dynamic>.from(data as Map));
+  }
+
+  @override
+  Future<String> transferTokens({
+    required String fromAddress,
+    required String toAddress,
+    required BigInt amountWei,
+    required String idempotencyKey,
+  }) async {
+    // Wei amounts exceed a 64-bit int (10 tokens = 1e19 > 2^63), so the JSON is written by hand
+    // and the amount goes out as a plain integer literal. The private key is never sent.
+    // (A plain String body is sent as-is; unlike a stream it can be replayed after a token refresh.)
+    final body = '{"fromAddress":${jsonEncode(fromAddress)},'
+        '"toAddress":${jsonEncode(toAddress)},'
+        '"amount":$amountWei,'
+        '"idempotencyKey":${jsonEncode(idempotencyKey)}}';
+    final data = await _send(() => _client.dio.put<dynamic>(_transferPath, data: body));
+    return (data as Map)['txHash'] as String;
   }
 
   Future<dynamic> _send(Future<Response<dynamic>> Function() request) async {

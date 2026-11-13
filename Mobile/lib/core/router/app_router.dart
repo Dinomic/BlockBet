@@ -13,6 +13,8 @@ import '../../features/auth/presentation/pages/sign_up_page.dart';
 import '../../features/home/presentation/pages/app_shell.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/wallet/presentation/bloc/wallets_bloc.dart';
+import '../../features/wallet/presentation/bloc/transfer_bloc.dart';
+import '../../features/wallet/presentation/pages/transfer_page.dart';
 import '../../features/wallet/presentation/pages/wallets_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import 'routes.dart';
@@ -53,7 +55,19 @@ GoRouter createRouter(AuthBloc authBloc) {
             GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: Routes.wallets, builder: (_, _) => const WalletsPage()),
+            GoRoute(
+              path: Routes.wallets,
+              builder: (_, _) => const WalletsPage(),
+              routes: [
+                GoRoute(
+                  path: 'transfer',
+                  builder: (_, state) => BlocProvider(
+                    create: (_) => sl<TransferBloc>(),
+                    child: TransferPage(initialFrom: state.uri.queryParameters['from']),
+                  ),
+                ),
+              ],
+            ),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(

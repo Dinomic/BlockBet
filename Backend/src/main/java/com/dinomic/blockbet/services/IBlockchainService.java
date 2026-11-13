@@ -18,5 +18,12 @@ public interface IBlockchainService {
 
     BigInteger getWalletBalance(@NotNull String walletAddress);
 
-    String transferEth(Wallet fromWallet, @NotNull String toAddress, BigInteger amount);
+    /**
+     * Signs and broadcasts a transfer and returns its transaction hash. A durable record is written
+     * before the broadcast; {@code idempotencyKey} is stored with it.
+     */
+    String transferEth(Wallet fromWallet, @NotNull String toAddress, BigInteger amount, @NotNull String idempotencyKey);
+
+    /** Whether the node knows this transaction (pending or mined). */
+    boolean transactionExists(@NotNull String txHash);
 }

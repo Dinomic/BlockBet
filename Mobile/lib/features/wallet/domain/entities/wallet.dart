@@ -34,6 +34,21 @@ class Wallet extends Equatable {
     return '${negative ? '-' : ''}$wholeStr${trimmed.isEmpty ? '' : '.$trimmed'}';
   }
 
+  static final _addressPattern = RegExp(r'^0x[0-9a-fA-F]{40}$');
+
+  static bool isValidAddress(String a) => _addressPattern.hasMatch(a);
+
+  /// Parses a user-typed token amount (`1`, `1.5`, `0,5`, `.25`) into wei.
+  /// Returns null for empty / malformed input or more than 18 decimals.
+  static BigInt? parseTokens(String input) {
+    final s = input.trim().replaceAll(',', '.');
+    final m = RegExp(r'^(\d*)(?:\.(\d{0,18}))?$').firstMatch(s);
+    if (m == null || s.isEmpty || s == '.') return null;
+    final whole = m.group(1)!.isEmpty ? '0' : m.group(1)!;
+    final frac = (m.group(2) ?? '').padRight(18, '0');
+    return BigInt.parse(whole) * _weiPerToken + BigInt.parse(frac);
+  }
+
   static String shortenAddress(String a) =>
       a.length <= 14 ? a : '${a.substring(0, 6)}…${a.substring(a.length - 4)}';
 

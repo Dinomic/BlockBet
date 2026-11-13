@@ -57,6 +57,9 @@ public class BlockchainService implements IBlockchainService {
     @Autowired
     IBBTransactionReceiptRepo transactionReceiptRepo;
 
+    @Autowired
+    TransferReceiptRecorder receiptRecorder;
+
     @Override
     @Transactional
     public Wallet createWallet(Account account, String password) throws Exception {
@@ -154,18 +157,29 @@ public class BlockchainService implements IBlockchainService {
     }
 
     /**
-     * The transaction is signed locally first so its hash is known up front. The receipt row is
-     * written (and flushed) <b>before</b> the transaction is broadcast: if the DB write fails nothing
-     * has been sent, and if the broadcast fails the surrounding DB transaction rolls the row back.
-     * That way a transfer can never exist on chain without a matching record.
+     * The transaction is signed locally first so its hash is known up front, and its record is
+     * committed in its own transaction <b>before</b> it is broadcast (see {@link TransferReceiptRecorder}).
+     * So a transfer can never exist on chain without a record, even if the caller's transaction later
+     * fails to commit. The record starts as "pending"; {@link TransferReceiptTracker} confirms it.
+     *
+     * <p>Callers must serialize transfers per wallet (the service row-locks the wallet): the nonce is read
+     * from the node, so two concurrent transfers from one wallet would otherwise reuse it.
      */
     @Override
-    @Transactional
-    public String transferEth(Wallet from, String toAddress, BigInteger weiAmount) {
+    public String transferEth(Wallet from, String toAddress, BigInteger weiAmount, String idempotencyKey) {
+        String signedHex;
+        String txHash;
         try {
             BigInteger nonce = web3j.ethGetTransactionCount(
                 from.getAddress(), DefaultBlockParameterName.PENDING).send().getTransactionCount();
             BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+
+            // Fail early with a clear message: the wallet must cover the amount plus the network fee.
+            BigInteger fee = gasPrice.multiply(Transfer.GAS_LIMIT);
+            if (getWalletBalance(from.getAddress()).compareTo(weiAmount.add(fee)) < 0) {
+                throw new BlockBetException(BlockBetError.INSUFFICIENT_BALANCE,
+                    "Insufficient balance: the wallet must cover the amount plus the network fee");
+            }
 
             RawTransaction rawTransaction = RawTransaction.createEtherTransaction(
                 nonce, gasPrice, Transfer.GAS_LIMIT, toAddress, weiAmount);
@@ -173,28 +187,43 @@ public class BlockchainService implements IBlockchainService {
             Credentials credentials = Credentials.create(from.getPrivateKey());
             byte[] signedMessage = TransactionEncoder.signMessage(
                 rawTransaction, blockchainProperties.network().chainId(), credentials);
-            String signedHex = Numeric.toHexString(signedMessage);
-            String txHash = Hash.sha3(signedHex);
-
-            BBTransactionReceipt pendingReceipt = new BBTransactionReceipt();
-            pendingReceipt.setHash(txHash);
-            pendingReceipt.setFromAddress(from.getAddress());
-            pendingReceipt.setToAddress(toAddress);
-            pendingReceipt.setTransactionType(TransactionType.TOKEN_TRANSFER);
-            transactionReceiptRepo.saveAndFlush(pendingReceipt);
-
-            EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(signedHex).send();
-            if (ethSendTransaction.hasError()) {
-                throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR,
-                    "Transfer rejected by network: " + ethSendTransaction.getError().getMessage());
-            }
-
-            return txHash;
+            signedHex = Numeric.toHexString(signedMessage);
+            txHash = Hash.sha3(signedHex);
         } catch (BlockBetException e) {
             throw e;
         } catch (Exception e) {
-            log.error("Error transferring ETH from {} to {}", from.getAddress(), toAddress, e);
+            log.error("Error preparing transfer from {} to {}", from.getAddress(), toAddress, e);
             throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR, "Error transferring tokens");
+        }
+
+        // Durable first: if this fails nothing has been sent.
+        receiptRecorder.recordPending(txHash, from.getAddress(), toAddress, idempotencyKey);
+
+        try {
+            EthSendTransaction sent = web3j.ethSendRawTransaction(signedHex).send();
+            if (sent.hasError()) {
+                // Rejected by the node: it is not on chain, so the record is failed and the key freed.
+                log.warn("Transfer {} rejected by the node: {}", txHash, sent.getError().getMessage());
+                receiptRecorder.markFailed(txHash);
+                throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR, "The network rejected the transfer");
+            }
+        } catch (IOException e) {
+            // Unknown whether the node received it. The record stays pending: a retry with the same
+            // idempotency key checks the chain (transactionExists) instead of sending twice.
+            log.error("Could not reach the node to broadcast {}", txHash, e);
+            throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR,
+                "Could not reach the blockchain node. Check your balances, then retry the transfer");
+        }
+
+        return txHash;
+    }
+
+    @Override
+    public boolean transactionExists(String txHash) {
+        try {
+            return web3j.ethGetTransactionByHash(txHash).send().getTransaction().isPresent();
+        } catch (IOException e) {
+            throw new BlockBetException(BlockBetError.BLOCKCHAIN_ERROR, "Error checking the transaction");
         }
     }
 }

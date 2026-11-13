@@ -195,19 +195,23 @@ components:
       type: object
       required:
         - fromAddress
-        - fromPrivateKey
         - toAddress
         - amount
+        - idempotencyKey
       properties:
         fromAddress:
-          type: string
-        fromPrivateKey:
           type: string
         toAddress:
           type: string
         amount:
           description: token amount in wei
           type: integer
+        idempotencyKey:
+          description: >
+            client-generated id (letters, digits, '-' or '_', at most 64 chars) for this transfer.
+            Re-sending the same key for the same wallet returns the original transaction hash instead of
+            sending the tokens again, so a request can be retried safely after a timeout.
+          type: string
 
     TransferTokensPutResponse:
       type: object

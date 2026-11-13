@@ -21,6 +21,8 @@ import '../../features/wallet/data/repositories/wallet_repository_impl.dart';
 import '../../features/wallet/domain/repositories/wallet_repository.dart';
 import '../../features/wallet/domain/usecases/create_wallet.dart';
 import '../../features/wallet/domain/usecases/get_wallets.dart';
+import '../../features/wallet/domain/usecases/transfer_tokens.dart';
+import '../../features/wallet/presentation/bloc/transfer_bloc.dart';
 import '../../features/wallet/presentation/bloc/wallets_bloc.dart';
 import '../network/api_client.dart';
 
@@ -66,6 +68,8 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton<WalletRepository>(() => WalletRepositoryImpl(remote: sl()));
   sl.registerLazySingleton(() => GetWallets(sl()));
   sl.registerLazySingleton(() => CreateWallet(sl()));
+  sl.registerLazySingleton(() => TransferTokens(sl()));
+  sl.registerFactory(() => TransferBloc(transferTokens: sl()));
   sl.registerFactory(() => WalletsBloc(getWallets: sl(), createWallet: sl()));
 
   // Auth - presentation (singleton: it owns the app-wide session state)

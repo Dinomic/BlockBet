@@ -1,9 +1,12 @@
 package com.dinomic.blockbet.repositories;
 
 import com.dinomic.blockbet.daos.BBTransactionReceipt;
+import com.dinomic.blockbet.enums.TransactionType;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
@@ -24,4 +27,11 @@ public interface IBBTransactionReceiptRepo extends JpaRepository<BBTransactionRe
 
 
     Optional<BBTransactionReceipt> findByHash (@NotNull String hash);
+
+    Optional<BBTransactionReceipt> findByFromAddressAndIdempotencyKey(@NotNull String fromAddress, @NotNull String idempotencyKey);
+
+    /** Transfers that were broadcast but whose outcome is not known yet (IS_SUCCESS is null). */
+    @Query("select r from BBTransactionReceipt r where r.transactionType = :type and r.isSuccess is null " +
+        "order by r.transactionReceiptId")
+    List<BBTransactionReceipt> findUnconfirmed(@Param("type") TransactionType type, Pageable pageable);
 }

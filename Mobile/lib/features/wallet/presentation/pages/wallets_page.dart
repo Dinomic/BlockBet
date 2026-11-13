@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/routes.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/widgets/auth_form_widgets.dart';
 import '../../domain/entities/wallet.dart';
@@ -18,7 +20,7 @@ class WalletsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Wallets')),
+      appBar: AppBar(title: const Text('Wallets'), actions: const [_SendAction(), SizedBox(width: 4)]),
       floatingActionButton: const _CreateWalletButton(),
       body: SafeArea(
         child: BlocConsumer<WalletsBloc, WalletsState>(
@@ -160,7 +162,10 @@ class WalletTile extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Card(
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push('${Routes.transfer}?from=${wallet.address}'),
+        child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 6, 14),
         child: Row(
           children: [
@@ -209,7 +214,22 @@ class WalletTile extends StatelessWidget {
             ),
           ],
         ),
+        ),
       ),
+    );
+  }
+}
+
+class _SendAction extends StatelessWidget {
+  const _SendAction();
+
+  @override
+  Widget build(BuildContext context) {
+    final hasWallets = context.select((WalletsBloc b) => b.state.wallets.isNotEmpty);
+    return IconButton(
+      tooltip: 'Send tokens',
+      icon: const Icon(Icons.north_east_rounded),
+      onPressed: hasWallets ? () => context.push(Routes.transfer) : null,
     );
   }
 }

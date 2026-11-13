@@ -3,7 +3,9 @@ package com.dinomic.blockbet.services.impl;
 import blockbet.openapi.model.*;
 import com.dinomic.blockbet.IBlockBetConstant;
 import com.dinomic.blockbet.daos.Account;
+import com.dinomic.blockbet.daos.BBTransactionReceipt;
 import com.dinomic.blockbet.repositories.IAccountRepo;
+import com.dinomic.blockbet.repositories.IBBTransactionReceiptRepo;
 import com.dinomic.blockbet.daos.Wallet;
 import com.dinomic.blockbet.mappers.GeneralMapper;
 import com.dinomic.blockbet.services.IAccountService;
@@ -21,6 +23,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +41,12 @@ public class BlockBetService implements IBlockBetService {
 
     @Autowired
     IAccountRepo accountRepo;
+
+    @Autowired
+    IBBTransactionReceiptRepo receiptRepo;
+
+    @Autowired
+    TransferReceiptRecorder receiptRecorder;
 
     @Override
     @Transactional(readOnly = true)
@@ -122,23 +132,58 @@ public class BlockBetService implements IBlockBetService {
         return response;
     }
 
+    private static final Pattern ADDRESS_PATTERN = Pattern.compile("^0x[0-9a-fA-F]{40}$");
+    private static final Pattern IDEMPOTENCY_KEY_PATTERN = Pattern.compile("^[A-Za-z0-9_-]{1,64}$");
+
+    /**
+     * Ownership is proven by the authenticated account plus the wallet lookup (the server holds the key).
+     * The wallet row is locked for the whole transaction, so transfers from one wallet run one at a time.
+     */
     @Override
     @Transactional
     public TransferTokensPutResponse handleTransferTokensPutRequest(Account account, TransferTokensPutRequest request) {
         TransferTokensPutResponse response = new TransferTokensPutResponse();
 
-        Wallet fromWallet = walletRepo.findByAccountAndAddress(account, request.getFromAddress()).orElseThrow(() ->
+        Wallet fromWallet = walletRepo.findByAccountAndAddressForUpdate(account, request.getFromAddress()).orElseThrow(() ->
             new BlockBetException(BlockBetError.WALLET_NOT_FOUND, "Wallet not found with associated account")
         );
 
-        if (!fromWallet.getPrivateKey().equals(request.getFromPrivateKey())) {
-            throw new BlockBetException(BlockBetError.INPUT_PRIVATE_KEY_NOT_MATCH, "input private key not match");
+        String toAddress = request.getToAddress();
+        BigInteger amount = request.getAmount();
+        String idempotencyKey = request.getIdempotencyKey();
+
+        if (idempotencyKey == null || !IDEMPOTENCY_KEY_PATTERN.matcher(idempotencyKey).matches()) {
+            throw new BlockBetException(BlockBetError.INVALID_REQUEST,
+                "idempotencyKey must be 1-64 characters: letters, digits, '-' or '_'");
+        }
+        if (toAddress == null || !ADDRESS_PATTERN.matcher(toAddress).matches()) {
+            throw new BlockBetException(BlockBetError.INVALID_REQUEST, "toAddress is not a valid wallet address");
+        }
+        if (amount == null || amount.signum() <= 0) {
+            throw new BlockBetException(BlockBetError.INVALID_REQUEST, "amount must be greater than 0");
+        }
+        if (toAddress.equalsIgnoreCase(fromWallet.getAddress())) {
+            throw new BlockBetException(BlockBetError.INVALID_REQUEST, "Cannot transfer to the same wallet");
         }
 
-        response.setTxHash(blockchainService.transferEth(fromWallet, request.getToAddress(),
-            request.getAmount()));
+        // A retried request (same key) must not send the tokens twice.
+        Optional<BBTransactionReceipt> previous =
+            receiptRepo.findByFromAddressAndIdempotencyKey(fromWallet.getAddress(), idempotencyKey);
+        if (previous.isPresent()) {
+            BBTransactionReceipt original = previous.get();
+            if (!original.getToAddress().equalsIgnoreCase(toAddress)) {
+                throw new BlockBetException(BlockBetError.INVALID_REQUEST,
+                    "idempotencyKey was already used for a different transfer");
+            }
+            // Pending but unknown to the node means the earlier broadcast never arrived: send it afresh.
+            if (original.getSuccess() != null || blockchainService.transactionExists(original.getHash())) {
+                response.setTxHash(original.getHash());
+                return response;
+            }
+            receiptRecorder.markFailed(original.getHash());
+        }
 
-
+        response.setTxHash(blockchainService.transferEth(fromWallet, toAddress, amount, idempotencyKey));
         return response;
     }
 

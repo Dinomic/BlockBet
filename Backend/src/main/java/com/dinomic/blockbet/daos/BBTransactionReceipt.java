@@ -37,11 +37,29 @@ public class BBTransactionReceipt {
     @Column(name = "EFFECTIVE_GAS_PRICE")
     private Integer effectiveGasPrice;
 
+    /** null = broadcast but not confirmed yet, true = confirmed successful, false = failed. */
     @Column(name = "IS_SUCCESS")
     private Boolean isSuccess;
 
+    @Column(name = "IDEMPOTENCY_KEY")
+    private String idempotencyKey;
+
     public BBTransactionReceipt() {
 
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
+    }
+
+    /** Marks the transfer failed and frees its idempotency key so the same transfer can be sent again. */
+    public void markFailed() {
+        this.isSuccess = false;
+        this.idempotencyKey = null;
     }
 
     public Long getTransactionReceiptId() {
