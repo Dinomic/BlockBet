@@ -9,6 +9,9 @@ class AppTheme {
   static const double fieldRadius = 14;
   static const double controlHeight = 52;
   static const double screenPadding = 20;
+  static const double bannerRadius = 12;
+  static const double cardRadius = 20;
+  static const double chipRadius = 999;
 
   static ThemeData get light => _build(AppColors.lightScheme);
   static ThemeData get dark => _build(AppColors.darkScheme);
@@ -58,9 +61,10 @@ class AppTheme {
         border: border(scheme.outline),
         enabledBorder: border(scheme.outline),
         disabledBorder: border(scheme.outline),
-        focusedBorder: border(scheme.primary),
+        // tertiary = darker gold on light (>=3:1 against the field), same gold on dark.
+        focusedBorder: border(scheme.tertiary, 2),
         errorBorder: border(scheme.error),
-        focusedErrorBorder: border(scheme.error),
+        focusedErrorBorder: border(scheme.error, 2),
         errorStyle: textTheme.bodySmall?.copyWith(color: scheme.error),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -69,8 +73,9 @@ class AppTheme {
           shape: buttonShape,
           backgroundColor: scheme.primary,
           foregroundColor: scheme.onPrimary,
-          disabledBackgroundColor: scheme.primary.withValues(alpha: 0.6),
-          disabledForegroundColor: scheme.onPrimary.withValues(alpha: 0.8),
+          // Neutral (not washed-out gold) so "nothing to save yet" doesn't read as an error.
+          disabledBackgroundColor: scheme.onSurface.withValues(alpha: 0.12),
+          disabledForegroundColor: scheme.onSurface.withValues(alpha: 0.5),
           textStyle: textTheme.labelLarge,
         ),
       ),
@@ -90,6 +95,49 @@ class AppTheme {
         ),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: scheme.primary),
+      appBarTheme: AppBarTheme(
+        backgroundColor: scheme.surface,
+        foregroundColor: scheme.onSurface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleTextStyle: textTheme.titleLarge,
+      ),
+      cardTheme: CardThemeData(
+        color: scheme.surfaceContainerHighest,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(cardRadius),
+          side: BorderSide(color: scheme.outlineVariant, width: 1.5),
+        ),
+      ),
+      dividerTheme: DividerThemeData(color: scheme.outlineVariant, thickness: 1, space: 1),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: scheme.surfaceContainerHighest,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: scheme.primaryContainer,
+        height: 68,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return textTheme.labelMedium?.copyWith(
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(color: selected ? scheme.tertiary : scheme.onSurfaceVariant);
+        }),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: scheme.onSurface,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(color: scheme.surface),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(bannerRadius)),
+      ),
     );
   }
 }

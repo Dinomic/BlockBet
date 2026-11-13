@@ -10,13 +10,13 @@ class AppColors {
     surfaceContainerHighest: Color(0xFFFFFFFF), // fields, cards
     onSurface: Color(0xFF14110A),
     onSurfaceVariant: Color(0xFF6B6454),
-    outline: Color(0xFFD6CDB8),
-    outlineVariant: Color(0xFFD6CDB8),
+    outline: Color(0xFF8C8369), // input borders: 3.6:1 on bg (WCAG 1.4.11)
+    outlineVariant: Color(0xFFD6CDB8), // decorative: cards, dividers
     primary: Color(0xFFD4A017),
     onPrimary: Color(0xFF1A1405),
     primaryContainer: Color(0xFFFBF1D4),
     onPrimaryContainer: Color(0xFF14110A),
-    secondary: Color(0xFF0F9D6B), // ok / connected dot
+    secondary: Color(0xFF0A7A53), // ok / connected dot (5:1 on bg)
     onSecondary: Colors.white,
     tertiary: Color(0xFF8A6100), // gold text on light backgrounds
     onTertiary: Colors.white,
@@ -32,8 +32,8 @@ class AppColors {
     surfaceContainerHighest: Color(0xFF181510),
     onSurface: Color(0xFFF3EEE3),
     onSurfaceVariant: Color(0xFFA39A85),
-    outline: Color(0xFF3B3425),
-    outlineVariant: Color(0xFF3B3425),
+    outline: Color(0xFF776C55), // input borders: 3.5:1 on field (WCAG 1.4.11)
+    outlineVariant: Color(0xFF3B3425), // decorative: cards, dividers
     primary: Color(0xFFF5C542),
     onPrimary: Color(0xFF1A1405),
     primaryContainer: Color(0xFF2E2510),

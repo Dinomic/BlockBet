@@ -16,6 +16,8 @@ class LabeledField extends StatelessWidget {
     this.suffix,
     this.onSubmitted,
     this.autovalidateMode,
+    this.readOnly = false,
+    this.onTap,
   });
 
   final String label;
@@ -23,6 +25,8 @@ class LabeledField extends StatelessWidget {
   final String? Function(String?) validator;
   final String? helper;
   final bool enabled;
+  final bool readOnly;
+  final VoidCallback? onTap;
   final bool obscureText;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
@@ -45,6 +49,8 @@ class LabeledField extends StatelessWidget {
         TextFormField(
           controller: controller,
           enabled: enabled,
+          readOnly: readOnly,
+          onTap: onTap,
           validator: validator,
           autovalidateMode: autovalidateMode,
           obscureText: obscureText,

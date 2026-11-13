@@ -10,7 +10,8 @@ Mockup: `auth-mockup.html` (same folder). Scope: Login, Sign-up, Home placeholde
 | surface | `#FFFFFF` | `#181510` | `surfaceContainerHighest` (fields, cards) |
 | ink | `#14110A` | `#F3EEE3` | `onSurface` |
 | muted | `#6B6454` | `#A39A85` | `onSurfaceVariant` |
-| outline | `#D6CDB8` | `#3B3425` | `outline` |
+| outline (input borders, ≥3:1) | `#8C8369` | `#776C55` | `outline` |
+| outline-variant (cards, dividers) | `#D6CDB8` | `#3B3425` | `outlineVariant` |
 | primary (gold, button fill, logo) | `#D4A017` | `#F5C542` | `primary` |
 | on-primary (dark text on gold) | `#1A1405` | `#1A1405` | `onPrimary` |
 | primary-text (links, ghost button text; gold fill is too light for text on white) | `#8A6100` | `#F5C542` | `tertiary` (use for TextButton / OutlinedButton foreground) |

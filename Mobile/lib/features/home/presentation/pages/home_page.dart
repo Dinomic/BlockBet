@@ -6,6 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/brand_logo.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../wallet/presentation/bloc/wallets_bloc.dart';
+import '../../../wallet/presentation/pages/wallets_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -18,49 +20,89 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppTheme.screenPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [const BrandLogo(), const _NetworkChip()],
-              ),
-              const SizedBox(height: 28),
-              Text("You're in", style: theme.textTheme.headlineMedium),
-              const SizedBox(height: 16),
-              if (email != null)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: scheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: scheme.outline, width: 1.5),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Signed in as',
-                          style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
-                      const SizedBox(height: 4),
-                      Text(email, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
-                    ],
-                  ),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            final bloc = context.read<WalletsBloc>()..add(const WalletsRequested());
+            await bloc.stream.firstWhere((s) => !s.isRefreshing && s.status != WalletsStatus.loading);
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(AppTheme.screenPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [BrandLogo(), _NetworkChip()],
                 ),
-              const SizedBox(height: 16),
-              const _PlaceholderCard(title: 'Markets', body: 'Browse and bet on open markets. Coming soon.'),
-              const SizedBox(height: 12),
-              const _PlaceholderCard(title: 'My bets', body: 'Track your active and settled bets. Coming soon.'),
-              const SizedBox(height: 24),
-              OutlinedButton(
-                onPressed: () => context.read<AuthBloc>().add(const LogoutRequested()),
-                child: const Text('Log out'),
-              ),
-            ],
+                const SizedBox(height: 28),
+                Text('Welcome back', style: theme.textTheme.headlineMedium),
+                if (email != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                  ),
+                ],
+                const SizedBox(height: 20),
+                const _BalanceSummary(),
+                const SizedBox(height: 24),
+                Text('Coming up', style: theme.textTheme.titleLarge),
+                const SizedBox(height: 12),
+                const _PlaceholderCard(
+                  icon: Icons.casino_outlined,
+                  title: 'Markets',
+                  body: 'Browse and bet on open markets.',
+                ),
+                const SizedBox(height: 12),
+                const _PlaceholderCard(
+                  icon: Icons.receipt_long_outlined,
+                  title: 'My bets',
+                  body: 'Track your active and settled bets.',
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _BalanceSummary extends StatelessWidget {
+  const _BalanceSummary();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<WalletsBloc, WalletsState>(
+      builder: (context, state) {
+        switch (state.status) {
+          case WalletsStatus.loading:
+            return Container(
+              height: 112,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+              ),
+            );
+          case WalletsStatus.failure:
+            return Card(
+              child: ListTile(
+                leading: Icon(Icons.cloud_off_outlined, color: Theme.of(context).colorScheme.error),
+                title: const Text("Couldn't load balances"),
+                subtitle: Text(state.errorMessage ?? ''),
+                trailing: TextButton(
+                  onPressed: () => context.read<WalletsBloc>().add(const WalletsRequested()),
+                  child: const Text('Retry'),
+                ),
+              ),
+            );
+          case WalletsStatus.loaded:
+            return TotalBalanceCard(wallets: state.wallets, totalWei: state.totalWei);
+        }
+      },
     );
   }
 }
@@ -74,7 +116,10 @@ class _NetworkChip extends StatelessWidget {
     final scheme = theme.colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(AppTheme.chipRadius),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -92,7 +137,8 @@ class _NetworkChip extends StatelessWidget {
 }
 
 class _PlaceholderCard extends StatelessWidget {
-  const _PlaceholderCard({required this.title, required this.body});
+  const _PlaceholderCard({required this.icon, required this.title, required this.body});
+  final IconData icon;
   final String title;
   final String body;
 
@@ -104,12 +150,21 @@ class _PlaceholderCard extends StatelessWidget {
       painter: _DashedBorderPainter(color: scheme.outline, radius: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text(title, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 4),
-            Text(body, style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13, color: scheme.onSurfaceVariant)),
+            Icon(icon, color: scheme.onSurfaceVariant),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 2),
+                  Text(body, style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            Text('Soon', style: theme.textTheme.labelMedium?.copyWith(color: scheme.tertiary)),
           ],
         ),
       ),
