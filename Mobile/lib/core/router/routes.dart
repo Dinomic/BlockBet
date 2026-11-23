@@ -7,5 +7,6 @@ class Routes {
   static const home = '/';
   static const wallets = '/wallets';
   static const transfer = '/wallets/transfer';
+  static const receipts = '/wallets/receipts';
   static const profile = '/profile';
 }

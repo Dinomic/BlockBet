@@ -12,6 +12,8 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/sign_up_page.dart';
 import '../../features/home/presentation/pages/app_shell.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/receipt/presentation/bloc/receipts_bloc.dart';
+import '../../features/receipt/presentation/pages/receipts_page.dart';
 import '../../features/wallet/presentation/bloc/wallets_bloc.dart';
 import '../../features/wallet/presentation/bloc/transfer_bloc.dart';
 import '../../features/wallet/presentation/pages/transfer_page.dart';
@@ -64,6 +66,13 @@ GoRouter createRouter(AuthBloc authBloc) {
                   builder: (_, state) => BlocProvider(
                     create: (_) => sl<TransferBloc>(),
                     child: TransferPage(initialFrom: state.uri.queryParameters['from']),
+                  ),
+                ),
+                GoRoute(
+                  path: 'receipts',
+                  builder: (_, _) => BlocProvider(
+                    create: (_) => sl<ReceiptsBloc>()..add(const ReceiptsRequested()),
+                    child: const ReceiptsPage(),
                   ),
                 ),
               ],

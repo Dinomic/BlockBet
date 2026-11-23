@@ -16,6 +16,11 @@ import '../../features/profile/domain/repositories/profile_repository.dart';
 import '../../features/profile/domain/usecases/get_profile.dart';
 import '../../features/profile/domain/usecases/update_profile.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
+import '../../features/receipt/data/datasources/receipt_remote_data_source.dart';
+import '../../features/receipt/data/repositories/receipt_repository_impl.dart';
+import '../../features/receipt/domain/repositories/receipt_repository.dart';
+import '../../features/receipt/domain/usecases/get_receipts.dart';
+import '../../features/receipt/presentation/bloc/receipts_bloc.dart';
 import '../../features/wallet/data/datasources/wallet_remote_data_source.dart';
 import '../../features/wallet/data/repositories/wallet_repository_impl.dart';
 import '../../features/wallet/domain/repositories/wallet_repository.dart';
@@ -71,6 +76,12 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton(() => TransferTokens(sl()));
   sl.registerFactory(() => TransferBloc(transferTokens: sl()));
   sl.registerFactory(() => WalletsBloc(getWallets: sl(), createWallet: sl()));
+
+  // Receipts (transaction history)
+  sl.registerLazySingleton<ReceiptRemoteDataSource>(() => ReceiptRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<ReceiptRepository>(() => ReceiptRepositoryImpl(remote: sl()));
+  sl.registerLazySingleton(() => GetReceipts(sl()));
+  sl.registerFactory(() => ReceiptsBloc(getReceipts: sl()));
 
   // Auth - presentation (singleton: it owns the app-wide session state)
   sl.registerLazySingleton(

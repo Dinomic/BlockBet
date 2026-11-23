@@ -152,7 +152,7 @@
 							</supportingFilesToGenerate>
 							<configOptions>
 								<useSpringBoot3>true</useSpringBoot3>
-								<openApiNullable>true</openApiNullable>
+								<openApiNullable>false</openApiNullable>
 								<interfaceOnly>true</interfaceOnly>
 								<skipDefaultInterface>true</skipDefaultInterface>
 							</configOptions>
@@ -175,7 +175,8 @@
 							</supportingFilesToGenerate>
 							<configOptions>
 								<useSpringBoot3>true</useSpringBoot3>
-								<openApiNullable>true</openApiNullable>
+								<!-- false: JsonNullable is serialized as {"present":true} under Jackson 3 (Spring Boot 4) -->
+									<openApiNullable>false</openApiNullable>
 								<interfaceOnly>true</interfaceOnly>
 								<skipDefaultInterface>true</skipDefaultInterface>
 							</configOptions>

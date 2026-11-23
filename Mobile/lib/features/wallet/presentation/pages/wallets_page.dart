@@ -20,7 +20,18 @@ class WalletsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Wallets'), actions: const [_SendAction(), SizedBox(width: 4)]),
+      appBar: AppBar(
+        title: const Text('Wallets'),
+        actions: [
+          IconButton(
+            tooltip: 'Transactions',
+            icon: const Icon(Icons.receipt_long_outlined),
+            onPressed: () => context.push(Routes.receipts),
+          ),
+          const _SendAction(),
+          const SizedBox(width: 4),
+        ],
+      ),
       floatingActionButton: const _CreateWalletButton(),
       body: SafeArea(
         child: BlocConsumer<WalletsBloc, WalletsState>(

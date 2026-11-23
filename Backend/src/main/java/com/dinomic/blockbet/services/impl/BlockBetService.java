@@ -229,7 +229,7 @@ public class BlockBetService implements IBlockBetService {
                 r.getEffectiveGasPrice() == null ? null : BigInteger.valueOf(r.getEffectiveGasPrice()));
             entry.setTransactionType(
                 ReceiptsGetResponseEntry.TransactionTypeEnum.fromValue(r.getTransactionType().name()));
-            entry.setSuccess(org.openapitools.jackson.nullable.JsonNullable.of(r.getSuccess()));
+            entry.setSuccess(r.getSuccess());
             response.addResultItem(entry);
         }
         return response;
