@@ -38,8 +38,9 @@ public class GeneralController implements BlockbetApi {
 
     @Override
     public ResponseEntity<ReceiptsGetResponse> blockbetReceiptsGet(BigInteger offset, BigInteger limit) {
+        Account account = blockBetUtil.getAccountFromRequest();
 
-        return ResponseEntity.ok(blockBetService.handleReceiptsGetRequest(offset, limit));
+        return ResponseEntity.ok(blockBetService.handleReceiptsGetRequest(account, offset, limit));
     }
 
     @Override

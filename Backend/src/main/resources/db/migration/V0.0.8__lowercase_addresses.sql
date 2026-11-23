@@ -1,0 +1,14 @@
+-- Addresses are stored lower-case so receipts can be matched to wallets by exact comparison.
+-- FROM_ADDRESS of funding rows holds the internal account label (IBlockBetConstant.INTERNAL_ACCOUNT), not an address.
+UPDATE TRANSACTION_RECEIPTS
+SET FROM_ADDRESS = LOWER(FROM_ADDRESS)
+WHERE FROM_ADDRESS LIKE '0x%'
+  AND FROM_ADDRESS <> LOWER(FROM_ADDRESS);
+
+UPDATE TRANSACTION_RECEIPTS
+SET TO_ADDRESS = LOWER(TO_ADDRESS)
+WHERE TO_ADDRESS <> LOWER(TO_ADDRESS);
+
+UPDATE WALLETS
+SET ADDRESS = LOWER(ADDRESS)
+WHERE ADDRESS <> LOWER(ADDRESS);

@@ -77,7 +77,7 @@ paths:
 
   /blockbet/receipts:
     get:
-      summary: get transaction receipts
+      summary: get the transaction receipts sent from or to the caller's wallets, newest first
       parameters:
         - in: query
           name: offset
@@ -86,6 +86,7 @@ paths:
             type: integer
         - in: query
           name: limit
+          description: page size, 1 to 100
           required: true
           schema:
             type: integer
@@ -190,6 +191,15 @@ components:
           type: integer
         effectiveGasPrice:
           type: integer
+        transactionType:
+          type: string
+          enum:
+            - FUNDING
+            - TOKEN_TRANSFER
+        success:
+          description: null while the transaction is pending, true once confirmed, false if it failed
+          type: boolean
+          nullable: true
 
     TransferTokensPutRequest:
       type: object

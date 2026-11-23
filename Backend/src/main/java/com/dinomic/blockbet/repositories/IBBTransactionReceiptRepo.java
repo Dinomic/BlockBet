@@ -30,6 +30,25 @@ public interface IBBTransactionReceiptRepo extends JpaRepository<BBTransactionRe
 
     Optional<BBTransactionReceipt> findByFromAddressAndIdempotencyKey(@NotNull String fromAddress, @NotNull String idempotencyKey);
 
+    /** Receipts sent from or to any of the given addresses (exact match), newest first. */
+    @Query(
+        value = "select * from TRANSACTION_RECEIPTS tr " +
+            "where tr.FROM_ADDRESS in (:addresses) or tr.TO_ADDRESS in (:addresses) " +
+            "order by tr.TRANSACTION_RECEIPT_ID desc " +
+            "offset :offset limit :limit",
+        nativeQuery = true
+    )
+    List<BBTransactionReceipt> findByAddresses(@Param("addresses") List<String> addresses,
+                                               @Param("offset") long offset,
+                                               @Param("limit") long limit);
+
+    @Query(
+        value = "select count(*) from TRANSACTION_RECEIPTS tr " +
+            "where tr.FROM_ADDRESS in (:addresses) or tr.TO_ADDRESS in (:addresses)",
+        nativeQuery = true
+    )
+    long countByAddresses(@Param("addresses") List<String> addresses);
+
     /** Transfers that were broadcast but whose outcome is not known yet (IS_SUCCESS is null). */
     @Query("select r from BBTransactionReceipt r where r.transactionType = :type and r.isSuccess is null " +
         "order by r.transactionReceiptId")

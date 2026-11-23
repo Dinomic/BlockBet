@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -165,6 +166,8 @@ public class BlockBetService implements IBlockBetService {
         if (toAddress.equalsIgnoreCase(fromWallet.getAddress())) {
             throw new BlockBetException(BlockBetError.INVALID_REQUEST, "Cannot transfer to the same wallet");
         }
+        // Addresses are stored lower-case so receipts can be matched to wallets by exact comparison.
+        toAddress = toAddress.toLowerCase();
 
         // A retried request (same key) must not send the tokens twice.
         Optional<BBTransactionReceipt> previous =
@@ -187,8 +190,48 @@ public class BlockBetService implements IBlockBetService {
         return response;
     }
 
+    private static final int MAX_RECEIPTS_PAGE_SIZE = 100;
+
     @Override
-    public ReceiptsGetResponse handleReceiptsGetRequest(BigInteger offset, BigInteger limit) {
-        return null;
+    @Transactional(readOnly = true)
+    public ReceiptsGetResponse handleReceiptsGetRequest(Account account, BigInteger offset, BigInteger limit) {
+        if (offset == null || offset.signum() < 0) {
+            throw new BlockBetException(BlockBetError.INVALID_REQUEST, "offset must be 0 or greater");
+        }
+        if (limit == null || limit.signum() <= 0 || limit.compareTo(BigInteger.valueOf(MAX_RECEIPTS_PAGE_SIZE)) > 0) {
+            throw new BlockBetException(BlockBetError.INVALID_REQUEST,
+                "limit must be between 1 and " + MAX_RECEIPTS_PAGE_SIZE);
+        }
+
+        ReceiptsGetResponse response = new ReceiptsGetResponse();
+        response.setOffset(offset);
+        response.setLimit(limit);
+        response.setResult(new ArrayList<>());
+        response.setTotal(BigInteger.ZERO);
+
+        List<String> addresses = walletRepo.findAllByAccount(account).stream()
+            .map(Wallet::getAddress)
+            .collect(Collectors.toList());
+        if (addresses.isEmpty()) {
+            return response;
+        }
+
+        response.setTotal(BigInteger.valueOf(receiptRepo.countByAddresses(addresses)));
+        for (BBTransactionReceipt r : receiptRepo.findByAddresses(addresses, offset.longValueExact(), limit.longValue())) {
+            ReceiptsGetResponseEntry entry = new ReceiptsGetResponseEntry();
+            entry.setHash(r.getHash());
+            entry.setFromAddress(r.getFromAddress());
+            entry.setToAddress(r.getToAddress());
+            entry.setBlockHash(r.getBlockHash());
+            entry.setBlockNumber(r.getBlockNumber() == null ? null : BigInteger.valueOf(r.getBlockNumber()));
+            entry.setGasUsed(r.getGasUsed() == null ? null : BigInteger.valueOf(r.getGasUsed()));
+            entry.setEffectiveGasPrice(
+                r.getEffectiveGasPrice() == null ? null : BigInteger.valueOf(r.getEffectiveGasPrice()));
+            entry.setTransactionType(
+                ReceiptsGetResponseEntry.TransactionTypeEnum.fromValue(r.getTransactionType().name()));
+            entry.setSuccess(org.openapitools.jackson.nullable.JsonNullable.of(r.getSuccess()));
+            response.addResultItem(entry);
+        }
+        return response;
     }
 }

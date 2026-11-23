@@ -83,7 +83,7 @@ public class BlockchainService implements IBlockchainService {
             password,
             IBlockBetConstant.WALLET_FOLDER_PATH + fileName);
 
-        result.setAddress(credentials.getAddress());
+        result.setAddress(credentials.getAddress().toLowerCase());
         result.setPublicKey(IBlockBetConstant.HEX_PREFIX + credentials.getEcKeyPair().getPublicKey().toString(16));
         result.setPrivateKey(IBlockBetConstant.HEX_PREFIX + credentials.getEcKeyPair().getPrivateKey().toString(16));
         result.setAccount(account);

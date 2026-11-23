@@ -17,5 +17,5 @@ public interface IBlockBetService {
 
     TransferTokensPutResponse handleTransferTokensPutRequest(@NotNull Account account, @NotNull TransferTokensPutRequest request);
 
-    ReceiptsGetResponse handleReceiptsGetRequest(@NotNull BigInteger offset, @NotNull BigInteger limit);
+    ReceiptsGetResponse handleReceiptsGetRequest(@NotNull Account account, @NotNull BigInteger offset, @NotNull BigInteger limit);
 }
