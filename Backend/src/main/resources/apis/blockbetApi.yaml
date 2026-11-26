@@ -99,8 +99,146 @@ paths:
                 $ref: '#/components/schemas/ReceiptsGetResponse'
 
 
+  /blockbet/bets:
+    get:
+      summary: list the bets, newest first (bet details from the database, rules and money from the smart contract)
+      parameters:
+        - in: query
+          name: offset
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          description: page size, 1 to 50
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BetsGetResponse'
+
+  /blockbet/bets/{betId}:
+    get:
+      summary: get one bet
+      parameters:
+        - in: path
+          name: betId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BetResponse'
+
 components:
   schemas:
+    BetOption:
+      type: string
+      description: >
+        Option letters in the order of the bet's options (A is the first). A bet has 2 to 5 options,
+        so a bet with 3 options only accepts A, B and C.
+      enum:
+        - A
+        - B
+        - C
+        - D
+        - E
+
+    BetContractType:
+      type: string
+      description: >
+        Which smart contract a bet runs on.
+        MULTIPLE_OPTION_SIMPLE_POOL: 2 to 5 options, the whole pool is split equally between the bettors of the winning option.
+        More types are added here together with their contract (see BetContractService).
+      enum:
+        - MULTIPLE_OPTION_SIMPLE_POOL
+
+    BetStatus:
+      type: string
+      description: >
+        OPEN: bets accepted. CLOSED: betting time is over, waiting for the bookie's result.
+        RESOLVED: winner picked and paid out. REFUNDED: the internal team gave everybody their stake back.
+        CAUTION: the bookie has not resolved for too long, the internal team has to handle it.
+      enum:
+        - OPEN
+        - CLOSED
+        - RESOLVED
+        - REFUNDED
+        - CAUTION
+
+    TxHashResponse:
+      type: object
+      required:
+        - txHash
+      properties:
+        txHash:
+          type: string
+
+    BetsGetResponse:
+      type: object
+      required:
+        - offset
+        - limit
+        - total
+        - result
+      properties:
+        offset:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/BetResponse'
+
+    BetResponse:
+      type: object
+      properties:
+        betId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+        contractType:
+          $ref: '#/components/schemas/BetContractType'
+        bookieAddress:
+          type: string
+        options:
+          description: the options of the bet, in order (the first one is A)
+          type: array
+          items:
+            $ref: '#/components/schemas/BetOptionInfo'
+        stake:
+          description: wei each bettor sends
+          type: integer
+        pool:
+          description: total wei staked on this bet (stake x number of bettors)
+          type: integer
+        closeTime:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/BetStatus'
+        winner:
+          $ref: '#/components/schemas/BetOption'
+        createdAt:
+          type: string
+          format: date-time
+
     InfosGetResponse:
       type: object
       properties:
@@ -196,6 +334,13 @@ components:
           enum:
             - FUNDING
             - TOKEN_TRANSFER
+            - BET_INTERNAL_PAYOUT
+            - BET_PAYOUT
+            - BET_STAKE
+        amount:
+          description: amount in wei, when known (null for older receipts)
+          type: integer
+          nullable: true
         success:
           description: null while the transaction is pending, true once confirmed, false if it failed
           type: boolean
@@ -274,3 +419,14 @@ components:
           type: string
         privateKey:
           type: string
+
+    BetOptionInfo:
+      type: object
+      properties:
+        option:
+          $ref: '#/components/schemas/BetOption'
+        name:
+          type: string
+        bettors:
+          description: number of wallets that bet on this option
+          type: integer

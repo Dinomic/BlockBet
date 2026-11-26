@@ -107,7 +107,9 @@ public class BlockchainService implements IBlockchainService {
         }
 
         try {
-            transactionReceiptRepo.save(transactionReceiptConvert(transactionReceipt, TransactionType.FUNDING, Boolean.TRUE));
+            BBTransactionReceipt funding = transactionReceiptConvert(transactionReceipt, TransactionType.FUNDING, Boolean.TRUE);
+            funding.setAmount(Convert.toWei(BigDecimal.valueOf(etherAmount), Convert.Unit.ETHER).toBigIntegerExact());
+            transactionReceiptRepo.save(funding);
         } catch (RuntimeException e) {
             // Funds are already on chain; keep the hash in the log so the record can be rebuilt manually.
             log.error("Faucet tx {} to {} succeeded on chain but its receipt could not be saved",
@@ -160,7 +162,7 @@ public class BlockchainService implements IBlockchainService {
      * The transaction is signed locally first so its hash is known up front, and its record is
      * committed in its own transaction <b>before</b> it is broadcast (see {@link TransferReceiptRecorder}).
      * So a transfer can never exist on chain without a record, even if the caller's transaction later
-     * fails to commit. The record starts as "pending"; {@link TransferReceiptTracker} confirms it.
+     * fails to commit. The record starts as "pending"; {@link com.dinomic.blockbet.jobs.TransferReceiptTracker} confirms it.
      *
      * <p>Callers must serialize transfers per wallet (the service row-locks the wallet): the nonce is read
      * from the node, so two concurrent transfers from one wallet would otherwise reuse it.
@@ -197,7 +199,7 @@ public class BlockchainService implements IBlockchainService {
         }
 
         // Durable first: if this fails nothing has been sent.
-        receiptRecorder.recordPending(txHash, from.getAddress(), toAddress, idempotencyKey);
+        receiptRecorder.recordPending(txHash, from.getAddress(), toAddress, weiAmount, idempotencyKey);
 
         try {
             EthSendTransaction sent = web3j.ethSendRawTransaction(signedHex).send();

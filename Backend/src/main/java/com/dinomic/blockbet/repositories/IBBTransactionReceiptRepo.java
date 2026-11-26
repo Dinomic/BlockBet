@@ -26,7 +26,8 @@ public interface IBBTransactionReceiptRepo extends JpaRepository<BBTransactionRe
     List<BBTransactionReceipt> getUnDoneTxReceipts(@NotNull BigInteger offset, @NotNull BigInteger limit);
 
 
-    Optional<BBTransactionReceipt> findByHash (@NotNull String hash);
+    /** A hash is only unique together with the receiving address (a bet's resolve pays several), so say the type. */
+    Optional<BBTransactionReceipt> findByHashAndTransactionType(@NotNull String hash, @NotNull TransactionType type);
 
     Optional<BBTransactionReceipt> findByFromAddressAndIdempotencyKey(@NotNull String fromAddress, @NotNull String idempotencyKey);
 

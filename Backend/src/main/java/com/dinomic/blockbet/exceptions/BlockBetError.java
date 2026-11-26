@@ -8,7 +8,10 @@ public enum BlockBetError {
     INSUFFICIENT_BALANCE(400),
     WALLET_NOT_FOUND(404),
     WALLET_LIMIT_REACHED(409),
-    BB_RECEIPT_NOT_FOUND(404);
+    BB_RECEIPT_NOT_FOUND(404),
+    FORBIDDEN(403),
+    BET_NOT_FOUND(404),
+    BET_REJECTED(409);
 
     final int code;
 

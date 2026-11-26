@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
+
 /**
  * Writes transfer records in their <b>own</b> transactions. A transfer's record must be durable
  * <i>before</i> the transaction is broadcast: if it only lived in the caller's transaction, a failed
@@ -25,8 +27,9 @@ public class TransferReceiptRecorder {
      * The column itself stays nullable: faucet funding rows have no client key.
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void recordPending(String hash, String fromAddress, String toAddress, String idempotencyKey) {
+    public void recordPending(String hash, String fromAddress, String toAddress, BigInteger weiAmount, String idempotencyKey) {
         BBTransactionReceipt receipt = new BBTransactionReceipt();
+        receipt.setAmount(weiAmount);
         receipt.setHash(hash);
         receipt.setFromAddress(fromAddress);
         receipt.setToAddress(toAddress);
@@ -38,7 +41,7 @@ public class TransferReceiptRecorder {
     /** The transfer is known not to be on chain (rejected / never sent): free its idempotency key. */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void markFailed(String hash) {
-        receiptRepo.findByHash(hash).ifPresent(r -> {
+        receiptRepo.findByHashAndTransactionType(hash, TransactionType.TOKEN_TRANSFER).ifPresent(r -> {
             r.markFailed();
             receiptRepo.saveAndFlush(r);
         });

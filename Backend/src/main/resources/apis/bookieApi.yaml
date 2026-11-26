@@ -1,0 +1,109 @@
+openapi: 3.0.1
+info:
+  title: blockbet bookie API
+  description: Endpoints of the bookie, who creates bets and picks their winner. Needs the BOOKIE role.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: dev
+paths:
+  # One create endpoint per contract type (BetContractType): the path says which contract the bet runs on.
+  /bookie/bets/multiple-option-simple-pool:
+    post:
+      summary: (bookie) create a bet with 2 to 5 options. Sent to the smart contract, so it waits until the transaction is mined.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMultipleOptionSimplePoolBetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBetResponse'
+
+  /bookie/bets/multiple-option-simple-pool/{betId}/result:
+    put:
+      summary: (bookie) pick the winning option once betting is closed; the pool is paid out to the winners by the contract
+      parameters:
+        - in: path
+          name: betId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveMultipleOptionSimplePoolBetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'blockbetApi.yaml#/components/schemas/TxHashResponse'
+
+components:
+  schemas:
+    CreateMultipleOptionSimplePoolBetRequest:
+      type: object
+      required:
+        - fromAddress
+        - title
+        - options
+        - stake
+        - durationSeconds
+      properties:
+        fromAddress:
+          description: the bookie's wallet that creates the bet; it is the only one that can resolve it
+          type: string
+        title:
+          description: off-chain info, e.g. "Arsenal vs MU"
+          type: string
+          maxLength: 128
+        description:
+          description: off-chain info
+          type: string
+          maxLength: 1024
+        imageUrl:
+          description: off-chain info
+          type: string
+          maxLength: 512
+        options:
+          description: names of the options, stored in the contract; the first one is option A. E.g. ["Arsenal", "MU", "Draw"]
+          type: array
+          minItems: 2
+          maxItems: 5
+          items:
+            type: string
+            maxLength: 64
+        stake:
+          description: amount in wei every bettor has to send to bet
+          type: integer
+        durationSeconds:
+          description: how long, from now, bets are accepted (at most 365 days)
+          type: integer
+
+    CreateBetResponse:
+      type: object
+      required:
+        - betId
+        - txHash
+      properties:
+        betId:
+          type: integer
+        txHash:
+          type: string
+
+    ResolveMultipleOptionSimplePoolBetRequest:
+      type: object
+      required:
+        - winner
+      properties:
+        winner:
+          $ref: 'blockbetApi.yaml#/components/schemas/BetOption'

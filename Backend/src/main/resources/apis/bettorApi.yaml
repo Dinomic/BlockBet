@@ -1,0 +1,133 @@
+openapi: 3.0.1
+info:
+  title: blockbet bettor API
+  description: >
+    Endpoints of the bettor, who bets on the bets the bookies created, and reads their own betting log.
+    Needs the BETTOR role.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: dev
+paths:
+  # Per contract type: the path says which contract the bet must run on.
+  /bettor/bets/multiple-option-simple-pool/{betId}/place:
+    post:
+      summary: (bettor) bet on one option of the bet (A, B, ...; a bet only accepts as many letters as it has options). The stake defined by the bookie is taken from the given wallet.
+      parameters:
+        - in: path
+          name: betId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceMultipleOptionSimplePoolBetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'blockbetApi.yaml#/components/schemas/TxHashResponse'
+
+  /bettor/betting-logs:
+    get:
+      summary: list the betting actions of the caller (bets created, bets placed, results picked), newest first
+      parameters:
+        - in: query
+          name: offset
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          description: page size, 1 to 100
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: betId
+          description: only the actions on this bet
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BettingLogsGetResponse'
+
+components:
+  schemas:
+    PlaceMultipleOptionSimplePoolBetRequest:
+      type: object
+      required:
+        - fromAddress
+        - option
+      properties:
+        fromAddress:
+          description: the bettor's wallet that pays the stake
+          type: string
+        option:
+          $ref: 'blockbetApi.yaml#/components/schemas/BetOption'
+
+    BettingLogAction:
+      type: string
+      description: >
+        BET_CREATED: a bookie created a bet. BET_PLACED: a bettor placed a bet. BET_RESOLVED: a bookie picked the winner.
+        BET_REFUNDED: the internal team refunded the bet. BET_CAUTION_FLAGGED: the bet was not resolved in time.
+      enum:
+        - BET_CREATED
+        - BET_PLACED
+        - BET_RESOLVED
+        - BET_REFUNDED
+        - BET_CAUTION_FLAGGED
+
+    BettingLogsGetResponse:
+      type: object
+      required:
+        - offset
+        - limit
+        - total
+        - result
+      properties:
+        offset:
+          type: integer
+        limit:
+          type: integer
+        total:
+          description: number of log rows that match, not only the ones in this page
+          type: integer
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/BettingLogResponse'
+
+    BettingLogResponse:
+      type: object
+      properties:
+        bettingLogId:
+          type: integer
+        betId:
+          type: integer
+        action:
+          $ref: '#/components/schemas/BettingLogAction'
+        walletAddress:
+          type: string
+        option:
+          $ref: 'blockbetApi.yaml#/components/schemas/BetOption'
+        amount:
+          description: wei the action moved, when known (the stake of a placed bet)
+          type: integer
+        txHash:
+          type: string
+        detail:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

@@ -4,6 +4,10 @@ import blockbet.openapi.model.*;
 import com.dinomic.blockbet.IBlockBetConstant;
 import com.dinomic.blockbet.daos.Account;
 import com.dinomic.blockbet.daos.BBTransactionReceipt;
+import com.dinomic.blockbet.daos.Bet;
+import com.dinomic.blockbet.repositories.IBetRepo;
+import com.dinomic.blockbet.services.IBetContractService;
+import com.dinomic.blockbet.services.IBetService;
 import com.dinomic.blockbet.repositories.IAccountRepo;
 import com.dinomic.blockbet.repositories.IBBTransactionReceiptRepo;
 import com.dinomic.blockbet.daos.Wallet;
@@ -21,6 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +56,17 @@ public class BlockBetService implements IBlockBetService {
 
     @Autowired
     TransferReceiptRecorder receiptRecorder;
+
+    @Autowired
+    IBetRepo betRepo;
+
+    @Autowired
+    IBetContractService betContractService;
+
+    @Autowired
+    IBetService betService;
+
+    private static final int MAX_BETS_PAGE_SIZE = 50;
 
     @Override
     @Transactional(readOnly = true)
@@ -229,9 +248,79 @@ public class BlockBetService implements IBlockBetService {
                 r.getEffectiveGasPrice() == null ? null : BigInteger.valueOf(r.getEffectiveGasPrice()));
             entry.setTransactionType(
                 ReceiptsGetResponseEntry.TransactionTypeEnum.fromValue(r.getTransactionType().name()));
+            entry.setAmount(r.getAmount());
             entry.setSuccess(r.getSuccess());
             response.addResultItem(entry);
         }
         return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BetResponse handleBetsBetIdGetRequest(BigInteger betId) {
+        Bet bet = betService.findBet(betId);
+        return toBetResponse(bet);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BetsGetResponse handleBetsGetRequest(BigInteger offset, BigInteger limit) {
+        if (offset == null || offset.signum() < 0) {
+            throw new BlockBetException(BlockBetError.INVALID_REQUEST, "offset must be 0 or greater");
+        }
+        if (limit == null || limit.signum() <= 0 || limit.compareTo(BigInteger.valueOf(MAX_BETS_PAGE_SIZE)) > 0) {
+            throw new BlockBetException(BlockBetError.INVALID_REQUEST,
+                "limit must be between 1 and " + MAX_BETS_PAGE_SIZE);
+        }
+
+        BetsGetResponse response = new BetsGetResponse();
+        response.setOffset(offset);
+        response.setLimit(limit);
+        response.setTotal(BigInteger.valueOf(betRepo.count()));
+        for (Bet bet : betRepo.findPage(offset.longValueExact(), limit.longValue())) {
+            response.addResultItem(toBetResponse(bet));
+        }
+        return response;
+    }
+
+    /** What a bet is comes from the database; its rules and money are read from the smart contract. */
+    private BetResponse toBetResponse(Bet bet) {
+        IBetContractService.ChainBet chain = betContractService.getBet(bet.getContract(), bet.getChainBetId());
+        BetResponse response = new BetResponse();
+        // from the database
+        response.setBetId(BigInteger.valueOf(bet.getBetId()));
+        response.setTitle(bet.getTitle());
+        response.setDescription(bet.getDescription());
+        response.setImageUrl(bet.getImageUrl());
+        response.setContractType(bet.getContract().getContractType());
+        response.setCreatedAt(bet.getCreatedAt() == null ? null
+            : bet.getCreatedAt().atZone(ZoneId.systemDefault()).toOffsetDateTime());
+        // from the contract
+        response.setBookieAddress(chain.bookie());
+        List<BetOptionInfo> options = new ArrayList<>();
+        BigInteger bettors = BigInteger.ZERO;
+        for (int i = 0; i < chain.optionNames().size(); i++) {
+            BetOptionInfo info = new BetOptionInfo();
+            info.setOption(BetOption.values()[i]);
+            info.setName(chain.optionNames().get(i));
+            info.setBettors(chain.counts().get(i));
+            options.add(info);
+            bettors = bettors.add(chain.counts().get(i));
+        }
+        response.setOptions(options);
+        response.setStake(chain.stake());
+        response.setPool(chain.stake().multiply(bettors));
+        response.setCloseTime(OffsetDateTime.ofInstant(Instant.ofEpochSecond(chain.closeTime().longValueExact()), ZoneOffset.UTC));
+        response.setStatus(switch (chain.status()) {
+            case OPEN -> BetStatus.OPEN;
+            // CAUTION is only known to the database (see BetCautionTracker)
+            case CLOSED -> bet.isCaution() ? BetStatus.CAUTION : BetStatus.CLOSED;
+            case RESOLVED -> BetStatus.RESOLVED;
+            case REFUNDED -> BetStatus.REFUNDED;
+        });
+        if (chain.status() == IBetContractService.ChainStatus.RESOLVED) {
+            // the contract numbers the options from 1 (A), 0 means no winner
+            response.setWinner(BetOption.values()[chain.winner().toChain() - 1]);
+        }        return response;
     }
 }

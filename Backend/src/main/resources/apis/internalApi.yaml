@@ -1,0 +1,25 @@
+openapi: 3.0.1
+info:
+  title: blockbet internal API
+  description: Endpoints of the internal team. Needs the INTERNAL role.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: dev
+paths:
+  /internal/bets/{betId}/refund:
+    post:
+      summary: (internal team) refund every bettor of a bet in status CAUTION
+      parameters:
+        - in: path
+          name: betId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'blockbetApi.yaml#/components/schemas/TxHashResponse'

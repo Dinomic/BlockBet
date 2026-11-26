@@ -1,4 +1,4 @@
-package com.dinomic.blockbet.services.impl;
+package com.dinomic.blockbet.jobs;
 
 import com.dinomic.blockbet.daos.BBTransactionReceipt;
 import com.dinomic.blockbet.enums.TransactionType;
@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.web3j.protocol.Web3j;
@@ -33,7 +32,7 @@ public class TransferReceiptTracker {
     @Autowired
     Web3j web3j;
 
-    @Scheduled(fixedDelayString = "${blockbet.receipt-tracker.interval-ms:5000}")
+    /** Run by {@code PendingReceiptJob} (Quartz). */
     @Transactional
     public void confirmPendingTransfers() {
         List<BBTransactionReceipt> pending =

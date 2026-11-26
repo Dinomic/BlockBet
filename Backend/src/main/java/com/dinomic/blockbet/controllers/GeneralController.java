@@ -25,6 +25,16 @@ public class GeneralController implements BlockbetApi {
     IBlockBetService blockBetService;
 
     @Override
+    public ResponseEntity<BetsGetResponse> blockbetBetsGet(BigInteger offset, BigInteger limit) {
+        return ResponseEntity.ok(blockBetService.handleBetsGetRequest(offset, limit));
+    }
+
+    @Override
+    public ResponseEntity<BetResponse> blockbetBetsBetIdGet(BigInteger betId) {
+        return ResponseEntity.ok(blockBetService.handleBetsBetIdGetRequest(betId));
+    }
+
+    @Override
     public ResponseEntity<InfosGetResponse> blockbetInfosGet() {
         Account account = blockBetUtil.getAccountFromRequest();
         return ResponseEntity.ok(blockBetService.handleInfosGetRequest(account));

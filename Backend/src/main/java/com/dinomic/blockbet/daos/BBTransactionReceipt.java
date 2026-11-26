@@ -3,6 +3,8 @@ package com.dinomic.blockbet.daos;
 import com.dinomic.blockbet.enums.TransactionType;
 import jakarta.persistence.*;
 
+import java.math.BigInteger;
+
 @Entity
 @Table(name = "TRANSACTION_RECEIPTS")
 public class BBTransactionReceipt {
@@ -44,8 +46,20 @@ public class BBTransactionReceipt {
     @Column(name = "IDEMPOTENCY_KEY")
     private String idempotencyKey;
 
+    /** Wei moved, when the receipt is about a known amount; null otherwise. */
+    @Column(name = "AMOUNT", precision = 78, scale = 0)
+    private BigInteger amount;
+
     public BBTransactionReceipt() {
 
+    }
+
+    public BigInteger getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigInteger amount) {
+        this.amount = amount;
     }
 
     public String getIdempotencyKey() {

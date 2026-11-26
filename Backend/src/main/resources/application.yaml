@@ -16,6 +16,22 @@ spring:
     user: postgres
     password: postgres
     baseline-on-migrate: true
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never   # the QRTZ_ tables are created by Flyway (V0.0.3)
+    overwrite-existing-jobs: true   # so a changed interval below replaces the one saved in the database
+    properties:
+      org.quartz.scheduler.instanceId: AUTO
+      org.quartz.jobStore.isClustered: true   # several backend instances share the jobs; each run happens on one
+      org.quartz.jobStore.tablePrefix: QRTZ_
+      org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+      org.quartz.threadPool.threadCount: 4
+blockbet:
+  receipt-tracker:
+    interval-ms: 5000    # how often pending transfers are checked on chain
+  bet-caution:
+    interval-ms: 60000   # how often overdue bets are checked for CAUTION
 security:
   jwt:
     expirationTime: 15 #mins, access token

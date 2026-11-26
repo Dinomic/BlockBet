@@ -43,10 +43,13 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html").permitAll()
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/blockbet/**")
-                .hasAnyRole(AccountRole.ROLE_BOOKIE.getRole(), AccountRole.ROLE_BETTOR.getRole())
+                .requestMatchers("/bookie/**")
+                .hasAnyRole(AccountRole.ROLE_BOOKIE.getRole())
                 .requestMatchers("/bettor/**")
                 .hasAnyRole(AccountRole.ROLE_BETTOR.getRole())
+                // Locked for everyone until the internal authentication process is built; replace denyAll() then.
+                .requestMatchers("/internal/**").denyAll()
+                // /blockbet/** (general): any authenticated user.
                 .anyRequest().authenticated())
             .exceptionHandling((httpSecurityExceptionHandlingConfigurer ->
                 httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(authEntryPoint)));

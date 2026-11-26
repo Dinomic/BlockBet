@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -68,6 +68,11 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-quartz</artifactId>
 		</dependency>
 
 		<dependency>
@@ -177,6 +182,75 @@
 								<useSpringBoot3>true</useSpringBoot3>
 								<!-- false: JsonNullable is serialized as {"present":true} under Jackson 3 (Spring Boot 4) -->
 									<openApiNullable>false</openApiNullable>
+								<interfaceOnly>true</interfaceOnly>
+								<skipDefaultInterface>true</skipDefaultInterface>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>bookieApi</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>
+								${project.basedir}/src/main/resources/apis/bookieApi.yaml
+							</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>blockbet.openapi.api</apiPackage>
+							<modelPackage>blockbet.openapi.model</modelPackage>
+							<supportingFilesToGenerate>
+								ApiUtil.java
+							</supportingFilesToGenerate>
+							<configOptions>
+								<useSpringBoot3>true</useSpringBoot3>
+								<openApiNullable>false</openApiNullable>
+								<interfaceOnly>true</interfaceOnly>
+								<skipDefaultInterface>true</skipDefaultInterface>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>bettorApi</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>
+								${project.basedir}/src/main/resources/apis/bettorApi.yaml
+							</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>blockbet.openapi.api</apiPackage>
+							<modelPackage>blockbet.openapi.model</modelPackage>
+							<supportingFilesToGenerate>
+								ApiUtil.java
+							</supportingFilesToGenerate>
+							<configOptions>
+								<useSpringBoot3>true</useSpringBoot3>
+								<openApiNullable>false</openApiNullable>
+								<interfaceOnly>true</interfaceOnly>
+								<skipDefaultInterface>true</skipDefaultInterface>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>internalApi</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>
+								${project.basedir}/src/main/resources/apis/internalApi.yaml
+							</inputSpec>
+							<generatorName>spring</generatorName>
+							<apiPackage>blockbet.openapi.api</apiPackage>
+							<modelPackage>blockbet.openapi.model</modelPackage>
+							<supportingFilesToGenerate>
+								ApiUtil.java
+							</supportingFilesToGenerate>
+							<configOptions>
+								<useSpringBoot3>true</useSpringBoot3>
+								<openApiNullable>false</openApiNullable>
 								<interfaceOnly>true</interfaceOnly>
 								<skipDefaultInterface>true</skipDefaultInterface>
 							</configOptions>
