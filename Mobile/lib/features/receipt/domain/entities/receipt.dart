@@ -1,6 +1,19 @@
 import 'package:equatable/equatable.dart';
 
-enum ReceiptType { funding, tokenTransfer, unknown }
+enum ReceiptType {
+  funding,
+  tokenTransfer,
+
+  /// A bettor's stake going from their wallet to the bet's contract.
+  betStake,
+
+  /// A winner's share paid by the contract when the bookie resolved the bet.
+  betPayout,
+
+  /// The part of a pool that goes to the BlockBet internal account.
+  betInternalPayout,
+  unknown,
+}
 
 /// Where a transaction stands on the chain.
 enum ReceiptStatus { pending, confirmed, failed }

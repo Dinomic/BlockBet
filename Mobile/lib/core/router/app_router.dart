@@ -5,6 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/bet/presentation/bloc/bet_detail_bloc.dart';
+import '../../features/bet/presentation/bloc/bets_bloc.dart';
+import '../../features/bet/presentation/bloc/betting_logs_bloc.dart';
+import '../../features/bet/presentation/pages/betting_logs_page.dart';
+import '../../features/bet/presentation/bloc/create_bet_bloc.dart';
+import '../../features/bet/presentation/pages/bet_detail_page.dart';
+import '../../features/bet/presentation/pages/bets_list_page.dart';
+import '../../features/bet/presentation/pages/create_bet_page.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../di/injection.dart';
@@ -55,6 +63,43 @@ GoRouter createRouter(AuthBloc authBloc) {
         branches: [
           StatefulShellBranch(routes: [
             GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.bets,
+              builder: (_, _) => BlocProvider(
+                create: (_) => sl<BetsBloc>()..add(const BetsRequested()),
+                child: const BetsListPage(),
+              ),
+              routes: [
+                // Declared before ':betId' so "create" is not read as a bet id.
+                GoRoute(
+                  path: 'create',
+                  // Only bookies create bets: anybody else is sent back to the list.
+                  redirect: (_, _) => authBloc.state.isBookie ? null : Routes.bets,
+                  builder: (_, _) => BlocProvider(
+                    create: (_) => sl<CreateBetBloc>(),
+                    child: const CreateBetPage(),
+                  ),
+                ),
+                GoRoute(
+                  path: 'logs',
+                  builder: (_, _) => BlocProvider(
+                    create: (_) => sl<BettingLogsBloc>()..add(const BettingLogsRequested()),
+                    child: const BettingLogsPage(),
+                  ),
+                ),
+                GoRoute(
+                  path: ':betId',
+                  redirect: (_, state) => int.tryParse(state.pathParameters['betId'] ?? '') == null ? Routes.bets : null,
+                  builder: (_, state) => BlocProvider(
+                    create: (_) => sl<BetDetailBloc>(param1: int.parse(state.pathParameters['betId']!))
+                      ..add(const BetDetailRequested()),
+                    child: const BetDetailPage(),
+                  ),
+                ),
+              ],
+            ),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(

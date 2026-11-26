@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Bottom navigation around the signed-in tabs (Home / Wallets / Profile).
+/// Bottom navigation around the signed-in tabs (Home / Bets / Wallets / Profile).
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.navigationShell});
   final StatefulNavigationShell navigationShell;
@@ -19,6 +19,11 @@ class AppShell extends StatelessWidget {
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home_rounded),
             label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.casino_outlined),
+            selectedIcon: Icon(Icons.casino_rounded),
+            label: 'Bets',
           ),
           NavigationDestination(
             icon: Icon(Icons.account_balance_wallet_outlined),

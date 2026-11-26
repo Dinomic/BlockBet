@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/usecase/usecase.dart';
+import '../../domain/entities/user_role.dart';
 import '../../domain/usecases/get_session.dart';
 import '../../domain/usecases/login.dart';
 import '../../domain/usecases/logout.dart';
@@ -52,7 +53,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(result.when(
       success: (session) => session == null
           ? state.copyWith(status: AuthStatus.unauthenticated)
-          : state.copyWith(status: AuthStatus.authenticated, email: session.email),
+          : state.copyWith(
+              status: AuthStatus.authenticated,
+              email: session.email,
+              roles: session.roles,
+            ),
       failure: (_) => state.copyWith(status: AuthStatus.unauthenticated),
     ));
   }
@@ -64,6 +69,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       success: (s) => state.copyWith(
         status: AuthStatus.authenticated,
         email: s.email ?? event.email.trim(),
+        roles: s.roles,
         isSubmitting: false,
       ),
       failure: (f) => state.copyWith(
@@ -95,6 +101,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       success: (s) => state.copyWith(
         status: AuthStatus.authenticated,
         email: s.email ?? email,
+        roles: s.roles,
         isSubmitting: false,
       ),
       failure: (f) => state.copyWith(

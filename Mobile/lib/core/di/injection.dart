@@ -10,6 +10,14 @@ import '../../features/auth/domain/usecases/login.dart';
 import '../../features/auth/domain/usecases/logout.dart';
 import '../../features/auth/domain/usecases/sign_up.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/bet/data/datasources/bet_remote_data_source.dart';
+import '../../features/bet/data/repositories/bet_repository_impl.dart';
+import '../../features/bet/domain/repositories/bet_repository.dart';
+import '../../features/bet/domain/usecases/bet_usecases.dart';
+import '../../features/bet/presentation/bloc/bet_detail_bloc.dart';
+import '../../features/bet/presentation/bloc/bets_bloc.dart';
+import '../../features/bet/presentation/bloc/betting_logs_bloc.dart';
+import '../../features/bet/presentation/bloc/create_bet_bloc.dart';
 import '../../features/profile/data/datasources/profile_remote_data_source.dart';
 import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
@@ -82,6 +90,22 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton<ReceiptRepository>(() => ReceiptRepositoryImpl(remote: sl()));
   sl.registerLazySingleton(() => GetReceipts(sl()));
   sl.registerFactory(() => ReceiptsBloc(getReceipts: sl()));
+
+  // Bets (bettor: place; bookie: create / resolve; everybody: browse)
+  sl.registerLazySingleton<BetRemoteDataSource>(() => BetRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<BetRepository>(() => BetRepositoryImpl(remote: sl()));
+  sl.registerLazySingleton(() => GetBets(sl()));
+  sl.registerLazySingleton(() => GetBet(sl()));
+  sl.registerLazySingleton(() => GetBettingLogs(sl()));
+  sl.registerFactory(() => BettingLogsBloc(getLogs: sl()));
+  sl.registerLazySingleton(() => PlaceBet(sl()));
+  sl.registerLazySingleton(() => CreateBet(sl()));
+  sl.registerLazySingleton(() => ResolveBet(sl()));
+  sl.registerFactory(() => BetsBloc(getBets: sl()));
+  sl.registerFactoryParam<BetDetailBloc, int, void>(
+    (betId, _) => BetDetailBloc(betId: betId, getBet: sl(), placeBet: sl(), resolveBet: sl()),
+  );
+  sl.registerFactory(() => CreateBetBloc(createBet: sl()));
 
   // Auth - presentation (singleton: it owns the app-wide session state)
   sl.registerLazySingleton(

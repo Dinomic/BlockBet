@@ -5,8 +5,13 @@ class Routes {
   static const login = '/login';
   static const signUp = '/sign-up';
   static const home = '/';
+  static const bets = '/bets';
+  static const createBet = '/bets/create';
+  static const bettingLogs = '/bets/logs';
   static const wallets = '/wallets';
   static const transfer = '/wallets/transfer';
   static const receipts = '/wallets/receipts';
   static const profile = '/profile';
+
+  static String betPath(int betId) => '/bets/$betId';
 }

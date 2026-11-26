@@ -1,14 +1,19 @@
 import 'package:bbmobile/core/result.dart';
 import 'package:bbmobile/core/usecase/usecase.dart';
+import 'package:bbmobile/features/auth/domain/entities/user_role.dart';
+import 'package:bbmobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:bbmobile/features/profile/domain/entities/profile.dart';
 import 'package:bbmobile/features/profile/domain/usecases/get_profile.dart';
 import 'package:bbmobile/features/profile/domain/usecases/update_profile.dart';
 import 'package:bbmobile/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:bbmobile/features/profile/presentation/pages/profile_page.dart';
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+
+class MockAuthBloc extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
 
 class MockGetProfile extends Mock implements GetProfile {}
 
@@ -32,17 +37,33 @@ void main() {
   });
 
   Future<void> pump(WidgetTester tester) async {
+    final auth = MockAuthBloc();
+    when(() => auth.state).thenReturn(const AuthState(
+      status: AuthStatus.authenticated,
+      email: 'a@b.com',
+      roles: [UserRole.bookie, UserRole.bettor],
+    ));
     await tester.pumpWidget(MaterialApp(
-      home: BlocProvider(
-        create: (_) => ProfileBloc(getProfile: getProfile, updateProfile: updateProfile)
-          ..add(const ProfileRequested()),
-        child: const ProfilePage(),
+      home: BlocProvider<AuthBloc>.value(
+        value: auth,
+        child: BlocProvider(
+          create: (_) => ProfileBloc(getProfile: getProfile, updateProfile: updateProfile)
+            ..add(const ProfileRequested()),
+          child: const ProfilePage(),
+        ),
       ),
     ));
     await tester.pumpAndSettle();
   }
 
   Finder saveButton() => find.widgetWithText(FilledButton, 'Save changes');
+
+  testWidgets('shows the account role under the name, without Bettor for a bookie', (tester) async {
+    await pump(tester);
+
+    expect(find.bySemanticsLabel('Role: Bookie'), findsOneWidget);
+    expect(find.bySemanticsLabel('Role: Bettor'), findsNothing);
+  });
 
   testWidgets('shows loaded profile and keeps Save disabled until something changes', (tester) async {
     await pump(tester);

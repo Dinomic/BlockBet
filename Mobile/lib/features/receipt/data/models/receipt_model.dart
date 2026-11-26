@@ -32,6 +32,9 @@ class ReceiptModel {
   static ReceiptType _parseType(Object? v) => switch (v) {
         'FUNDING' => ReceiptType.funding,
         'TOKEN_TRANSFER' => ReceiptType.tokenTransfer,
+        'BET_STAKE' => ReceiptType.betStake,
+        'BET_PAYOUT' => ReceiptType.betPayout,
+        'BET_INTERNAL_PAYOUT' => ReceiptType.betInternalPayout,
         _ => ReceiptType.unknown,
       };
 

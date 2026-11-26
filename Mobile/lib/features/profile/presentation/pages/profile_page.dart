@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/widgets/auth_form_widgets.dart';
+import '../../../auth/presentation/widgets/role_widgets.dart';
 import '../../data/models/profile_model.dart';
 import '../../domain/entities/profile.dart';
 import '../bloc/profile_bloc.dart';
@@ -199,6 +200,8 @@ class _ProfileFormState extends State<_ProfileForm> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _Header(profile: _saved, avatarUrl: _avatarUrl.text.trim()),
+                const SizedBox(height: 12),
+                Center(child: RoleBadges(roles: context.select((AuthBloc b) => b.state.roles))),
                 const SizedBox(height: 24),
                 if (widget.state.errorMessage != null) ...[
                   ErrorBanner(title: "Couldn't save your profile", message: widget.state.errorMessage!),

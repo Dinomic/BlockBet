@@ -9,12 +9,23 @@ import '../../../wallet/presentation/bloc/wallets_bloc.dart';
 import '../../domain/entities/receipt.dart';
 import '../bloc/receipts_bloc.dart';
 
-enum _Direction { received, sent, funding }
+enum _Direction { received, sent, funding, betStake, betPayout }
 
-/// Funding comes from the faucet; otherwise the side that is one of the account's wallets decides.
+/// Funding comes from the faucet and bet money from / to a bet contract; otherwise the side that is one of
+/// the account's wallets decides.
 _Direction _directionOf(Receipt r, Set<String> myAddresses) {
-  if (r.type == ReceiptType.funding) return _Direction.funding;
-  return myAddresses.contains(r.fromAddress.toLowerCase()) ? _Direction.sent : _Direction.received;
+  switch (r.type) {
+    case ReceiptType.funding:
+      return _Direction.funding;
+    case ReceiptType.betStake:
+      return _Direction.betStake;
+    case ReceiptType.betPayout:
+    case ReceiptType.betInternalPayout:
+      return _Direction.betPayout;
+    case ReceiptType.tokenTransfer:
+    case ReceiptType.unknown:
+      return myAddresses.contains(r.fromAddress.toLowerCase()) ? _Direction.sent : _Direction.received;
+  }
 }
 
 class ReceiptsPage extends StatefulWidget {
@@ -126,12 +137,17 @@ class _ReceiptTile extends StatelessWidget {
         _Direction.funding => 'Wallet funded',
         _Direction.sent => 'Sent',
         _Direction.received => 'Received',
+        _Direction.betStake => 'Bet placed',
+        _Direction.betPayout =>
+          receipt.type == ReceiptType.betInternalPayout ? 'Pool remainder' : 'Bet winnings',
       };
 
   IconData get _icon => switch (direction) {
         _Direction.funding => Icons.water_drop_outlined,
         _Direction.sent => Icons.north_east_rounded,
         _Direction.received => Icons.south_west_rounded,
+        _Direction.betStake => Icons.casino_outlined,
+        _Direction.betPayout => Icons.emoji_events_outlined,
       };
 
   /// The other side of the transfer.
@@ -139,6 +155,8 @@ class _ReceiptTile extends StatelessWidget {
         _Direction.funding => 'Faucet → ${Wallet.shortenAddress(receipt.toAddress)}',
         _Direction.sent => 'To ${Wallet.shortenAddress(receipt.toAddress)}',
         _Direction.received => 'From ${Wallet.shortenAddress(receipt.fromAddress)}',
+        _Direction.betStake => 'To bet ${Wallet.shortenAddress(receipt.toAddress)}',
+        _Direction.betPayout => 'To ${Wallet.shortenAddress(receipt.toAddress)}',
       };
 
   @override
